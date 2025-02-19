@@ -46,15 +46,12 @@
                 <th style="min-width: 180px;">Destination</th>
                 <th style="min-width: 150px;">Vehicle No</th>
                 <th style="min-width: 200px;">GSTIN</th>
-                <th style="min-width: 250px;">Description of Goods</th>
-                <th style="min-width: 150px;">HSN Code</th>
                 <th style="min-width: 120px;">Quantity</th>
                 <th style="min-width: 120px;">Rate</th>
                 <th style="min-width: 120px;">CGST</th>
                 <th style="min-width: 120px;">SGST</th>
+                <th style="min-width: 120px;">IGST</th>
                 <th style="min-width: 120px;">Total Amount</th>
-                <th style="min-width: 200px;">Amount Chargeable</th>
-                <th style="min-width: 200px;">Declaration</th>
                 <th style="min-width: 200px;">Bank Name</th>
                 <th style="min-width: 150px;">Account No</th>
                 <th style="min-width: 150px;">IFSC Code</th>
@@ -68,237 +65,335 @@
                 {
                     <tr style="background-color: @(Model.IndexOf(data) % 2 == 0 ? "#f9f9f9" : "white");">
                         <td> <span class="toggle-link" onclick="toggleTable('@data.FileName')">@data.FileName</span></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.Irn))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.AcknowledgeNumber))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.AcknowledgeDate))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.Buyer))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
                         <td>
-                            <select class="form-control">
+                            <input list="irnOptions" class="form-control" name="irn" id="irnInput" placeholder="Enter IRN"
+                                   value="@getUnique(data.Irn).FirstOrDefault()">
+                            <datalist id="irnOptions">
+                                @foreach (var item in getUnique(data.Irn))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="ackNumOptions" class="form-control" name="ackNum" id="ackNumInput" placeholder="Enter acknowledgement number"
+                                   value="@getUnique(data.AcknowledgeNumber).FirstOrDefault()">
+                            <datalist id="ackNumOptions">
+                                @foreach (var item in getUnique(data.AcknowledgeNumber))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="ackDtOptions" class="form-control" name="ackDt" id="ackDtInput" placeholder="Enter acknowledgement date"
+                                   value="@getUnique(data.AcknowledgeDate).FirstOrDefault()">
+                            <datalist id="ackDtOptions">
+                                @foreach (var item in getUnique(data.AcknowledgeDate))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="buyerOptions" class="form-control" name="buyer" id="buyerInput" placeholder="Enter buyer"
+                                   value="@getUnique(data.Buyer).FirstOrDefault()">
+                            <datalist id="buyerOptions">
+                                @foreach (var item in getUnique(data.Buyer))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="gstinOptions" class="form-control" name="buyerGstin" id="buyerGstInput" placeholder="Enter buyer GSTIN"
+                                   value="@getUnique(data.BuyerGstin).FirstOrDefault()">
+                            <datalist id="gstinOptions">
                                 @foreach (var item in getUnique(data.BuyerGstin))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerAddressLine1))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerState))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerPinCode))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
                         <td>
-                            <select class="form-control">
+                            <input list="buyerAddressOptions" class="form-control" name="buyerAddress" id="buyerAddInput" placeholder="Enter buyer address"
+                                     value="@getUnique(data.BuyerAddressLine1).FirstOrDefault()">
+                            <datalist id="buyerAddressOptions">
+                                @foreach (var item in getUnique(data.BuyerGstin))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="buyerStateOptions" class="form-control" name="buyetState" id="buyerStateInput" placeholder="Enter buyer state"
+                                   value="@getUnique(data.BuyerState).FirstOrDefault()">
+                            <datalist id="buyerStateOptions">
+                                @foreach (var item in getUnique(data.BuyerState))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="buyerPinOptions" class="form-control" name="buyerPin" id="buyerPinInput" placeholder="Enter buyer pincode"
+                                      value="@getUnique(data.BuyerPinCode).FirstOrDefault()">
+                            <datalist id="buyerPinOptions">
+                                @foreach (var item in getUnique(data.BuyerPinCode))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="buyerContactOptions" class="form-control" name="buyerContact" id="buyerContactInput" placeholder="Enter buyer contact"
+                                   value="@getUnique(data.BuyerContactPerson).FirstOrDefault()">
+                            <datalist id="buyerContactOptions">
                                 @foreach (var item in getUnique(data.BuyerContactPerson))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerContactNumber))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerEmail))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipTo))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipToAddressLine1))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipToContactPerson))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
                         <td>
-                            <select class="form-control">
+                            <input list="buyerContactNumOptions" class="form-control" name="buyerContactNum" id="buyerContacNumInput" placeholder="Enter buyer contact number"
+                                   value="@getUnique(data.BuyerContactNumber).FirstOrDefault()">
+                            <datalist id="buyerContactNumOptions">
+                                @foreach (var item in getUnique(data.BuyerContactNumber))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="buyerEmailOptions" class="form-control" name="buyerEmail" id="buyerEmailInput" placeholder="Enter buyer email"
+                                   value="@getUnique(data.BuyerEmail).FirstOrDefault()">
+                            <datalist id="buyerEmailOptions">
+                                @foreach (var item in getUnique(data.BuyerEmail))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="shipToOptions" class="form-control" name="shipTo" id="shipToInput" placeholder="Enter ship to"
+                                   value="@getUnique(data.ShipTo).FirstOrDefault()">
+                            <datalist id="shipToOptions">
+                                @foreach (var item in getUnique(data.ShipTo))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="shipToAddressOptions" class="form-control" name="shipToAddress" id="shipToAddressInput" placeholder="Enter ship to address"
+                                   value="@getUnique(data.ShipToAddressLine1).FirstOrDefault()">
+                            <datalist id="shipToAddressOptions">
+                                @foreach (var item in getUnique(data.ShipToAddressLine1))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="shipToContactOptions" class="form-control" name="shipToContact" id="shipToContactInput" placeholder="Enter ship to contact person"
+                                   value="@getUnique(data.ShipToContactPerson).FirstOrDefault()">
+                            <datalist id="shipToContactOptions">
+                                @foreach (var item in getUnique(data.ShipToContactPerson))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="shipToContactNumOptions" class="form-control" name="shipToContactNum" id="shipToContactNumInput" placeholder="Enter ship to contact number"
+                                   value="@getUnique(data.ShipToContactNumber).FirstOrDefault()">
+                            <datalist id="shipToContactNumOptions">
                                 @foreach (var item in getUnique(data.ShipToContactNumber))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.InvoiceNumber))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
-                        <td><select class="form-control">@foreach (var item in getUnique(data.InvoiceDate))
-                                {
-                                    <option value="@item">@item</option>
-                                }</select></td>
                         <td>
-                            <select class="form-control">
+                            <input list="invoiceNumberOptions" class="form-control" name="invoiceNum" id="invoiceNumInput" placeholder="Enter invoice number"
+                                   value="@getUnique(data.InvoiceNumber).FirstOrDefault()">
+                            <datalist id="invoiceNumberOptions">
+                                @foreach (var item in getUnique(data.InvoiceNumber))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="invoiceDateOptions" class="form-control" name="invoiceDate" id="invoiceDateInput" placeholder="Enter invoice date"
+                                   value="@getUnique(data.InvoiceDate).FirstOrDefault()">
+                            <datalist id="invoiceDateOptions">
+                                @foreach (var item in getUnique(data.InvoiceDate))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="deliveryNoteOptions" class="form-control" name="deliveryNote" id="deliveryNoteInput" placeholder="Enter delivery note"
+                                   value="@getUnique(data.DeleiveryNote).FirstOrDefault()">
+                            <datalist id="deliveryNoteOptions">
                                 @foreach (var item in getUnique(data.DeleiveryNote))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="termsOptions" class="form-control" name="terms" id="termsInput" placeholder="Enter terms of payment"
+                                   value="@getUnique(data.TermsOfPayment).FirstOrDefault()">
+                            <datalist id="termsOptions">
                                 @foreach (var item in getUnique(data.TermsOfPayment))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="despatchDocOptions" class="form-control" name="despatchDoc" id="despatchDocInput" placeholder="Enter depatch doument number"
+                                   value="@getUnique(data.DespatchDocNo).FirstOrDefault()">
+                            <datalist id="despatchDocOptions">
                                 @foreach (var item in getUnique(data.DespatchDocNo))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="despatchThroughOptions" class="form-control" name="despatchThrough" id="despatchThroughInput" placeholder="Enter depatch through"
+                                   value="@getUnique(data.DespatchThrough).FirstOrDefault()">
+                            <datalist id="despatchThroughOptions">
                                 @foreach (var item in getUnique(data.DespatchThrough))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="destinationOptions" class="form-control" name="destination" id="destinationInput" placeholder="Enter destination"
+                                   value="@getUnique(data.Destination).FirstOrDefault()">
+                            <datalist id="destinationOptions">
                                 @foreach (var item in getUnique(data.Destination))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="vehicleNumOptions" class="form-control" name="vehicleNum" id="vehicleNumInput" placeholder="Enter vehicle number"
+                                   value="@getUnique(data.VehicleNo).FirstOrDefault()">
+                            <datalist id="vehicleNumOptions">
                                 @foreach (var item in getUnique(data.VehicleNo))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="sellerGstinOptions" class="form-control" name="sellerGstin" id="sellerGstinInput" placeholder="Enter seller GSTIN number"
+                                   value="@getUnique(data.SellerGstin).FirstOrDefault()">
+                            <datalist id="sellerGstinOptions">
                                 @foreach (var item in getUnique(data.SellerGstin))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
-                        </td>
+                            </datalist>
+                        </td>                   
                         <td>
-                            <select class="form-control">
-                                @foreach (var item in getUnique(data.DescriptionOfGoods))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select class="form-control">
-                                @foreach (var item in getUnique(data.HsnCode))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select class="form-control">
+                            <input list="quantityOptions" class="form-control" name="quantity" id="quantityInput" placeholder="Enter total quantity"
+                                   value="@getUnique(data.Quantity).FirstOrDefault()">
+                            <datalist id="quantityOptions">
                                 @foreach (var item in getUnique(data.Quantity))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="rateOptions" class="form-control" name="rate" id="rateInput" placeholder="Enter taxable amount"
+                                   value="@getUnique(data.Rate).FirstOrDefault()">
+                            <datalist id="rateOptions">
                                 @foreach (var item in getUnique(data.Rate))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="cgstOptions" class="form-control" name="cgst" id="cgstInput" placeholder="Enter CGST"
+                                   value="@getUnique(data.Cgst).FirstOrDefault()">
+                            <datalist id="cgstOptions">
                                 @foreach (var item in getUnique(data.Cgst))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="sgstOptions" class="form-control" name="cgst" id="sgstInput" placeholder="Enter SGST"
+                                   value="@getUnique(data.Sgst).FirstOrDefault()">
+                            <datalist id="sgstOptions">
                                 @foreach (var item in getUnique(data.Sgst))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="igstOptions" class="form-control" name="igst" id="igstInput" placeholder="Enter IGST"
+                                   value="@getUnique(data.Igst).FirstOrDefault()">
+                            <datalist id="igstOptions">
+                                @foreach (var item in getUnique(data.Igst))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="totalAmtOptions" class="form-control" name="totalAmt" id="totalAmtInput" placeholder="Enter Total Amount"
+                                   value="@getUnique(data.TotalAmount).FirstOrDefault()">
+                            <datalist id="totalAmtOptions">
                                 @foreach (var item in getUnique(data.TotalAmount))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
-                                @foreach (var item in getUnique(data.AmountChargable))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select class="form-control">
-                                @foreach (var item in getUnique(data.Declaration))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select class="form-control">
+                            <input list="bankNametOptions" class="form-control" name="bankName" id="bankNameInput" placeholder="Enter bank name"
+                                   value="@getUnique(data.BankName).FirstOrDefault()">
+                            <datalist id="bankNametOptions">
                                 @foreach (var item in getUnique(data.BankName))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="accountNumOptions" class="form-control" name="accountNum" id="accountNumInput" placeholder="Enter account number"
+                                   value="@getUnique(data.AcctNo).FirstOrDefault()">
+                            <datalist id="accountNumOptions">
                                 @foreach (var item in getUnique(data.AcctNo))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td>
-                            <select class="form-control">
+                            <input list="ifscOptions" class="form-control" name="ifsc" id="ifscInput" placeholder="Enter IFSC code"
+                                   value="@getUnique(data.IfscCode).FirstOrDefault()">
+                            <datalist id="ifscOptions">
                                 @foreach (var item in getUnique(data.IfscCode))
                                 {
-                                    <option value="@item">@item</option>
+                                    <option value="@item"></option>
                                 }
-                            </select>
+                            </datalist>
                         </td>
                         <td><button class="btn btn-success btn-sm">Save</button> <button class="btn btn-danger btn-sm">Delete</button></td>
                     </tr>
@@ -307,7 +402,7 @@
                             @if (data.ExtractedTables?.Any() ?? false)
                             {
                                 <div class="table-container">
-                                    <h5>Extracted Tables for <strong>@data.FileName</strong></h5>
+                                    <h5>Commodity table<strong>@data.FileName</strong></h5>
                                     @foreach (var table in data.ExtractedTables)
                                     {
                                         <table class="table table-bordered">

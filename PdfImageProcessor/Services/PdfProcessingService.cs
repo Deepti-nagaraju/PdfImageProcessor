@@ -91,7 +91,7 @@ namespace PdfImageProcessor.Services
                             
                     var structuredTable = new TableModel
                     {
-                        Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity", "SGST", "CGST", "IGST", "Amount" },
+                        Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity","Taxable Value","SGST", "CGST", "IGST", "Amount" },
                         Rows = new List<List<string>>()
                     };
 
@@ -105,9 +105,10 @@ namespace PdfImageProcessor.Services
                 GetColumnValue(row, headers, new List<string> { "Description","Item","Product","Model","Vessel" }),
                 GetColumnValue(row, headers, new List<string> { "HSN","Item Code","SAC","code" }),
                 GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }),
-                GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per Quantity","Price" }),
-                GetColumnValue(row, headers, new List<string> { "SGST","Tax" }),
-                GetColumnValue(row, headers, new List<string> { "CGST" }),
+                GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per","Price","MRP" }),
+                GetColumnValue(row, headers, new List<string> { "tax"}),
+                GetColumnValue(row, headers, new List<string> { "SGST","state" }),
+                GetColumnValue(row, headers, new List<string> { "CGST","central" }),
                 GetColumnValue(row, headers, new List<string> { "IGST" }),
                 GetColumnValue(row, headers, new List<string> { "Amount", "Amt" })
             };
@@ -286,7 +287,7 @@ namespace PdfImageProcessor.Services
 
                     if (key.Contains("ifs")) extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")) extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct")|| key.Contains("account no")|| key.Contains("a/c")) extractedData.AcctNo.Add(value);
                     if (key.Contains("eway")) extractedData.EWayBill.Add(value);
                 }
             }
