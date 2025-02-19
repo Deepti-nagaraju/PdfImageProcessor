@@ -1,0 +1,371 @@
+﻿@model List<PdfImageProcessor.Models.MainTableModel>
+
+@{
+    ViewData["Title"] = "Extracted Data";
+
+    // ✅ Get unique values for each dropdown across all files
+    Func<List<string>, List<string>> getUnique = values => values?.Distinct().ToList() ?? new List<string>();
+}
+<!-- Export to Excel Button -->
+<div>
+    <a href="javascript:void(0);"
+       style="margin: 10px 0; font-size: 16px; text-decoration: underline; color: blue; cursor: pointer;"
+       onclick="exportToExcel(event)">
+        Export to Excel
+    </a>
+
+</div>
+<div class="table-area table-responsive"
+     style="overflow-x: auto; max-width: 100%; white-space: nowrap; min-width: 100%;">
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="min-width: 150px;">File Name</th>
+                <th style="min-width: 180px;">IRN</th>
+                <th style="min-width: 180px;">Acknowledge Number</th>
+                <th style="min-width: 180px;">Acknowledge Date</th>
+                <th style="min-width: 180px;">Buyer</th>
+                <th style="min-width: 200px;">Buyer GSTIN</th>
+                <th style="min-width: 200px;">Buyer Address</th>
+                <th style="min-width: 150px;">Buyer State</th>
+                <th style="min-width: 120px;">Buyer Pin</th>
+                <th style="min-width: 150px;">Buyer Contact</th>
+                <th style="min-width: 150px;">Buyer Contact Number</th>
+                <th style="min-width: 200px;">Buyer Email</th>
+                <th style="min-width: 200px;">Ship To</th>
+                <th style="min-width: 200px;">Ship To Address</th>
+                <th style="min-width: 180px;">Ship Contact Person</th>
+                <th style="min-width: 180px;">Ship Contact Number</th>
+                <th style="min-width: 180px;">Invoice Number</th>
+                <th style="min-width: 180px;">Invoice Date</th>
+                <th style="min-width: 180px;">Delivery Note</th>
+                <th style="min-width: 180px;">Terms of Payment</th>
+                <th style="min-width: 180px;">Despatch Doc No</th>
+                <th style="min-width: 180px;">Despatch Through</th>
+                <th style="min-width: 180px;">Destination</th>
+                <th style="min-width: 150px;">Vehicle No</th>
+                <th style="min-width: 200px;">GSTIN</th>
+                <th style="min-width: 250px;">Description of Goods</th>
+                <th style="min-width: 150px;">HSN Code</th>
+                <th style="min-width: 120px;">Quantity</th>
+                <th style="min-width: 120px;">Rate</th>
+                <th style="min-width: 120px;">CGST</th>
+                <th style="min-width: 120px;">SGST</th>
+                <th style="min-width: 120px;">Total Amount</th>
+                <th style="min-width: 200px;">Amount Chargeable</th>
+                <th style="min-width: 200px;">Declaration</th>
+                <th style="min-width: 200px;">Bank Name</th>
+                <th style="min-width: 150px;">Account No</th>
+                <th style="min-width: 150px;">IFSC Code</th>
+                <th style="min-width: 180px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var data in Model)
+                {
+                    <tr style="background-color: @(Model.IndexOf(data) % 2 == 0 ? "#f9f9f9" : "white");">
+                        <td> <span class="toggle-link" onclick="toggleTable('@data.FileName')">@data.FileName</span></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.Irn))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.AcknowledgeNumber))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.AcknowledgeDate))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.Buyer))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.BuyerGstin))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerAddressLine1))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerState))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerPinCode))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.BuyerContactPerson))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerContactNumber))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.BuyerEmail))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipTo))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipToAddressLine1))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.ShipToContactPerson))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.ShipToContactNumber))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.InvoiceNumber))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td><select class="form-control">@foreach (var item in getUnique(data.InvoiceDate))
+                                {
+                                    <option value="@item">@item</option>
+                                }</select></td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.DeleiveryNote))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.TermsOfPayment))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.DespatchDocNo))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.DespatchThrough))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Destination))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.VehicleNo))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.SellerGstin))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.DescriptionOfGoods))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.HsnCode))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Quantity))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Rate))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Cgst))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Sgst))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.TotalAmount))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.AmountChargable))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.Declaration))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.BankName))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.AcctNo))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control">
+                                @foreach (var item in getUnique(data.IfscCode))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td><button class="btn btn-success btn-sm">Save</button> <button class="btn btn-danger btn-sm">Delete</button></td>
+                    </tr>
+                    <tr id="table-@data.FileName" class="hidden-table">
+                        <td colspan="5">
+                            @if (data.ExtractedTables?.Any() ?? false)
+                            {
+                                <div class="table-container">
+                                    <h5>Extracted Tables for <strong>@data.FileName</strong></h5>
+                                    @foreach (var table in data.ExtractedTables)
+                                    {
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    @foreach (var header in table.Headers)
+                                                    {
+                                                        <th>@header</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in table.Rows)
+                                                {
+                                                    <tr>
+                                                        @foreach (var cell in row)
+                                                        {
+                                                        <td>
+                                                            <input type="text" class="form-control editable-cell" value="@cell" />
+                                                        </td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="no-tables">No relevant tables found in this file.</p>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <!-- Add an empty row with non-breaking spaces to maintain structure -->
+                <tr>
+                    <td colspan="36" class="text-center" style="height: 50px;">No Data Available</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+
+<script>
+    function toggleTable(fileName) {
+        var tableRow = document.getElementById("table-" + fileName);
+        if (tableRow.style.display === "none" || tableRow.classList.contains("hidden-table")) {
+            tableRow.style.display = "table-row";
+            tableRow.classList.remove("hidden-table");
+        } else {
+            tableRow.style.display = "none";
+            tableRow.classList.add("hidden-table");
+        }
+    }
+</script>
+
+

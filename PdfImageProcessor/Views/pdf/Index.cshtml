@@ -1,0 +1,310 @@
+﻿@{
+    ViewData["Title"] = "Upload PDF";
+}
+<link rel="stylesheet" href="~/css/styles.css" />
+<style>
+    .main-content {
+        margin: 50px 20px;
+    }
+
+    .form-control:focus {
+        box-shadow: none !important;
+    }
+
+    .upload-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 500;
+        color: #5E6282;
+        margin-bottom: 15px;
+    }
+
+    select.form-control {
+        font-size: 16px; /* Increase dropdown text size */
+        padding: 8px; /* Increase padding for better spacing */
+    }
+
+        /* Increase font size of options inside dropdown */
+        select.form-control option {
+            font-size: 16px; /* Increase dropdown option text size */
+            padding: 5px; /* Add padding to options */
+        }
+
+    input.form-control {
+        font-size: 16px; /* Increase dropdown text size */
+        padding: 8px; /* Increase padding for better spacing */
+    }
+
+        /* Increase font size of options inside dropdown */
+        input.form-control option {
+            font-size: 16px; /* Increase dropdown option text size */
+            padding: 5px; /* Add padding to options */
+        }
+
+    .invoice-for-area,
+    .message {
+        width: 100%;
+        padding: 0;
+        padding-top: 5px;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+    }
+
+    .upload-area {
+        width: 100%;
+        margin-bottom: 10px;
+        padding-bottom: 0px;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+    }
+
+    .input-file {
+        color: #717171;
+        font-size: medium;
+        border-radius: 20px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .upload-button {
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 8.5px 5.8px;
+        //background: linear-gradient(180deg, #0A6B76 0%, #0A6B76 100%);
+        background: linear-gradient(to right, #27aab8, #0A6B76);
+        border-radius: 20px;
+        text-align: center;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+        .upload-button:hover {
+            background: #27aab8;
+        }
+
+    .export-link {
+        display: flex;
+        flex-direction: row-reverse;
+        height: 30px;
+    }
+
+        .export-link button {
+            padding-right: 5px;
+            color: #0A6B76;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+            .export-link button:hover {
+                color: #eee;
+            }
+
+    .table-area {
+        //margin: 0 5px;
+        //padding: 20px;
+        max-height: 60vh;
+        overflow-y: auto;
+        //box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        background: transparent;
+        border-radius: 5px;
+    }
+
+    table tbody td {
+        color: #717171;
+        font-size: 16px;
+        font-weight: normal;
+    }
+
+    table thead th {
+        background: #0A6B76;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    /*table tbody tr:hover td {
+        background: #eee;
+        cursor: pointer;
+    }*/
+
+    td.action,
+    table tbody tr {
+        vertical-align: middle;
+    }
+
+    .table tr:nth-child(odd) td {
+        background: #F7F6FE;
+        //background: radial-gradient(circle, #e9fafd, #fff);
+    }
+
+    .center-align {
+        text-align: center;
+    }
+
+    .hidden-table {
+        display: none;
+    }
+
+    .table-container {
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+
+    .toggle-link {
+        cursor: pointer;
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+    .no-tables {
+        color: #888;
+        font-style: italic;
+        text-align: center;
+        margin-top: 5px;
+    }
+    .loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid white;
+    border-top: 5px solid orange;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+</style>
+<!-- Loader (Hidden by Default) -->
+<div id="loader" class="loader-container" style="display: none;">
+    <div class="spinner"></div>
+    <p>Processing... Please wait.</p>
+</div>
+
+
+    <!-- Page Content -->
+<div class="main-content">
+    <div class="upload-title">Upload Your Invoices</div>
+
+    <!-- Upload Form -->
+    <div class="upload-area">
+    <form id="uploadForm" method="post" enctype="multipart/form-data" asp-controller="Pdf" asp-action="UploadPdf" style="margin-top: 20px;">
+        <div style="margin-bottom: 15px;">
+            <label for="pdfFile" style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Upload PDF File:</label>
+            <input type="file" name="pdfFiles" id="pdfFile" multiple required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+
+        <div style="text-align: center;">
+@*                 <button id="process" type="submit" class="upload-button" style="background-color: cornflowerblue; color: white; border: none; padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer;">
+                    Process
+                </button> *@
+                <button id="process" type="button" class="upload-button"
+                        style="background-color: darkorange; color: white; border: none; padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer;"
+                        onclick="processFiles(event)">
+                    Process
+                </button>
+
+              
+        </div>
+    </form>
+    </div>
+
+    <!-- Space for Extracted Data Table (Initially Hidden) -->
+    <div id="extractedDataContainer" style="margin-top: 20px;">
+        <!-- This will be updated dynamically -->
+    </div>
+ </div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Ensure only one submit event is bound to the form
+        $("#uploadForm").off("submit").on("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            document.getElementById('loader').style.display = 'flex';
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "/Pdf/UploadPdf", // ✅ Ensure this matches your controller route
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    document.getElementById('loader').style.display = 'none';
+                    
+                        $("#extractedDataContainer").html(response); // ✅ Update extracted data
+                },
+                error: function () {
+                    document.getElementById('loader').style.display = 'none';
+                    alert("Error processing the PDF.");
+                }
+            });
+        });
+    });
+
+    // ✅ Moved outside so they are accessible globally
+    function processFiles(event) {
+        event.preventDefault(); // Stop default event propagation
+
+        $("#uploadForm").submit(); // ✅ Ensure only the form is submitted
+    }
+    function exportToExcel(event) {
+        event.preventDefault(); // Prevent unintended form submission
+
+        $.ajax({
+            url: "/Pdf/ExportToExcel", // ✅ Ensure this matches the controller route
+            type: "POST",
+            xhrFields: { responseType: "blob" }, // ✅ Treat response as binary file
+            success: function (response, status, xhr) {
+                var filename = "ExtractedData.xlsx";
+
+                // ✅ Get the correct file type
+                var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
+
+                // ✅ Create a download link
+                var link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function () {
+                alert("Error exporting to Excel.");
+            }
+        });
+
+    }
+
+</script>
