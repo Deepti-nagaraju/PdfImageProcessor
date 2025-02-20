@@ -318,7 +318,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
                     if (key.Contains("despatch") && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
                     if (key.Contains("through") || (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
-                    if (key.Contains("vehicle no")) extractedData.VehicleNo.Add(value);
+                    if (key.Contains("vehicle no")|| key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")) extractedData.Destination.Add(value);
 
 
@@ -339,7 +339,7 @@ namespace PdfImageProcessor.Services
 
                     if (key.Contains("ifs")) extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")) extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct")|| key.Contains("account no")|| key.Contains("a/c")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct")|| key.Contains("account")|| key.Contains("a/c")) extractedData.AcctNo.Add(value);
                     if (key.Contains("eway")) extractedData.EWayBill.Add(value);
                 }
             }
