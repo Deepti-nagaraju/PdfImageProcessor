@@ -10,7 +10,7 @@
 <div>
     <a href="javascript:void(0);"
        style="margin: 10px 0; font-size: 16px; text-decoration: underline; color: blue; cursor: pointer;"
-       onclick="exportToExcel(event)">
+       id="exportBtn" onclick="exportToExcel(event)">
         Export to Excel
     </a>
 
@@ -18,44 +18,45 @@
 <div class="table-area table-responsive"
      style="overflow-x: auto; max-width: 100%; white-space: nowrap; min-width: 100%;">
 
-    <table class="table table-bordered">
+    <table class="table table-bordered" id="dataTable">
         <thead>
             <tr>
-                <th style="min-width: 150px;">File Name</th>
-                <th style="min-width: 180px;">IRN</th>
-                <th style="min-width: 180px;">Acknowledge Number</th>
-                <th style="min-width: 180px;">Acknowledge Date</th>
-                <th style="min-width: 180px;">Buyer</th>
-                <th style="min-width: 200px;">Buyer GSTIN</th>
-                <th style="min-width: 200px;">Buyer Address</th>
-                <th style="min-width: 150px;">Buyer State</th>
-                <th style="min-width: 120px;">Buyer Pin</th>
-                <th style="min-width: 150px;">Buyer Contact</th>
-                <th style="min-width: 150px;">Buyer Contact Number</th>
-                <th style="min-width: 200px;">Buyer Email</th>
-                <th style="min-width: 200px;">Ship To</th>
-                <th style="min-width: 200px;">Ship To Address</th>
-                <th style="min-width: 180px;">Ship Contact Person</th>
-                <th style="min-width: 180px;">Ship Contact Number</th>
-                <th style="min-width: 180px;">Invoice Number</th>
-                <th style="min-width: 180px;">Invoice Date</th>
-                <th style="min-width: 180px;">Delivery Note</th>
-                <th style="min-width: 180px;">Terms of Payment</th>
-                <th style="min-width: 180px;">Despatch Doc No</th>
-                <th style="min-width: 180px;">Despatch Through</th>
-                <th style="min-width: 180px;">Destination</th>
-                <th style="min-width: 150px;">Vehicle No</th>
-                <th style="min-width: 200px;">GSTIN</th>
-                <th style="min-width: 120px;">Quantity</th>
-                <th style="min-width: 120px;">Rate</th>
-                <th style="min-width: 120px;">CGST</th>
-                <th style="min-width: 120px;">SGST</th>
-                <th style="min-width: 120px;">IGST</th>
-                <th style="min-width: 120px;">Total Amount</th>
-                <th style="min-width: 200px;">Bank Name</th>
-                <th style="min-width: 150px;">Account No</th>
-                <th style="min-width: 150px;">IFSC Code</th>
-                <th style="min-width: 180px;">Actions</th>
+                <th style="min-width: 150px;" id="FileName">File Name</th>
+                <th style="min-width: 180px;" id="Irn">IRN</th>
+                <th style="min-width: 180px;" id="AcknowledgeNumber">Acknowledge Number</th>
+                <th style="min-width: 180px;" id="AcknowledgeDate">Acknowledge Date</th>
+                <th style="min-width: 180px;" id="Buyer">Buyer</th>
+                <th style="min-width: 200px;" id="BuyerGstin">Buyer GSTIN</th>
+                <th style="min-width: 200px;" id="BuyerAddressLine1">Buyer Address</th>
+                <th style="min-width: 150px;" id="BuyerState">Buyer State</th>
+                <th style="min-width: 120px;" id="BuyerPinCode">Buyer Pin</th>
+                <th style="min-width: 150px;" id="BuyerContactPerson">Buyer Contact</th>
+                <th style="min-width: 150px;" id="BuyerContactNumber">Buyer Contact Number</th>
+                <th style="min-width: 200px;" id="BuyerEmail">Buyer Email</th>
+                <th style="min-width: 200px;" id="ShipTo">Ship To</th>
+                <th style="min-width: 200px;" id="ShipToAddressLine1">Ship To Address</th>
+                <th style="min-width: 180px;" id="ShipToContactPerson">Ship To Contact Person</th>
+                <th style="min-width: 180px;" id="ShipToContactNumber">Ship To Contact Number</th>
+                <th style="min-width: 200px;" id="ShipToEmail">Ship To Email</th>
+                <th style="min-width: 180px;" id="InvoiceNumber">Invoice Number</th>
+                <th style="min-width: 180px;" id="InvoiceDate">Invoice Date</th>
+                <th style="min-width: 180px;" id="EWayBill">Eway Bill Number</th>
+                <th style="min-width: 180px;" id="DeleiveryNote">Delivery Note</th>
+                <th style="min-width: 180px;" id="TermsOfPayment">Terms of Payment</th>
+                <th style="min-width: 180px;" id="DespatchDocNo">Despatch Doc No</th>
+                <th style="min-width: 180px;" id="DespatchThrough">Despatch Through</th>
+                <th style="min-width: 180px;" id="Destination">Destination</th>
+                <th style="min-width: 150px;" id="VehicleNo">Vehicle No</th>
+                <th style="min-width: 120px;" id="Quantity">Quantity</th>
+                <th style="min-width: 120px;" id="Rate">Rate</th>
+                <th style="min-width: 120px;" id="Cgst">CGST</th>
+                <th style="min-width: 120px;" id="Sgst">SGST</th>
+                <th style="min-width: 120px;" id="Igst">IGST</th>
+                <th style="min-width: 120px;" id="TotalAmount">Total Amount</th>
+                <th style="min-width: 200px;" id="BankName">Bank Name</th>
+                <th style="min-width: 150px;" id="AcctNo">Account No</th>
+                <th style="min-width: 150px;" id="IfscCode">IFSC Code</th>
+               @*  <th style="min-width: 180px;" id="">Actions</th> *@
             </tr>
         </thead>
         <tbody>
@@ -63,7 +64,7 @@
             {
                 @foreach (var data in Model)
                 {
-                    <tr style="background-color: @(Model.IndexOf(data) % 2 == 0 ? "#f9f9f9" : "white");">
+                    <tr style="background-color: @(Model.IndexOf(data) % 2 == 0 ? "#f9f9f9" : "white");" class="main-row">
                         <td> <span class="toggle-link" onclick="toggleTable('@data.FileName')">@data.FileName</span></td>
                         <td>
                             <input list="irnOptions" class="form-control" name="irn" id="irnInput" placeholder="Enter IRN"
@@ -216,6 +217,16 @@
                             </datalist>
                         </td>
                         <td>
+                            <input list="shipToEmailOptions" class="form-control" name="shipToEmai;m" id="shipToEmailInput" placeholder="Enter ship to email"
+                                   value="@getUnique(data.ShipToEmail).FirstOrDefault()">
+                            <datalist id="shipToEmailOptions">
+                                @foreach (var item in getUnique(data.ShipToEmail))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
                             <input list="invoiceNumberOptions" class="form-control" name="invoiceNum" id="invoiceNumInput" placeholder="Enter invoice number"
                                    value="@getUnique(data.InvoiceNumber).FirstOrDefault()">
                             <datalist id="invoiceNumberOptions">
@@ -230,6 +241,16 @@
                                    value="@getUnique(data.InvoiceDate).FirstOrDefault()">
                             <datalist id="invoiceDateOptions">
                                 @foreach (var item in getUnique(data.InvoiceDate))
+                                {
+                                    <option value="@item"></option>
+                                }
+                            </datalist>
+                        </td>
+                        <td>
+                            <input list="ewayBillOptions" class="form-control" name="ewayBill" id="ewayBillInput" placeholder="Enter Eway bill number"
+                                   value="@getUnique(data.EWayBill).FirstOrDefault()">
+                            <datalist id="ewayBillOptions">
+                                @foreach (var item in getUnique(data.EWayBill))
                                 {
                                     <option value="@item"></option>
                                 }
@@ -294,17 +315,7 @@
                                     <option value="@item"></option>
                                 }
                             </datalist>
-                        </td>
-                        <td>
-                            <input list="sellerGstinOptions" class="form-control" name="sellerGstin" id="sellerGstinInput" placeholder="Enter seller GSTIN number"
-                                   value="@getUnique(data.SellerGstin).FirstOrDefault()">
-                            <datalist id="sellerGstinOptions">
-                                @foreach (var item in getUnique(data.SellerGstin))
-                                {
-                                    <option value="@item"></option>
-                                }
-                            </datalist>
-                        </td>                   
+                        </td>            
                         <td>
                             <input list="quantityOptions" class="form-control" name="quantity" id="quantityInput" placeholder="Enter total quantity"
                                    value="@getUnique(data.Quantity).FirstOrDefault()">
@@ -395,9 +406,9 @@
                                 }
                             </datalist>
                         </td>
-                        <td><button class="btn btn-success btn-sm">Save</button> <button class="btn btn-danger btn-sm">Delete</button></td>
+                       @*  <td><button class="btn btn-success btn-sm">Save</button> <button class="btn btn-danger btn-sm">Delete</button></td> *@
                     </tr>
-                    <tr id="table-@data.FileName" class="hidden-table">
+                    <tr id="table-@data.FileName" class="hidden-table sub-table-row">
                         <td colspan="5">
                             @if (data.ExtractedTables?.Any() ?? false)
                             {

@@ -188,48 +188,48 @@ namespace PdfImageProcessor.Services
                         extractedData.BuyerGstin.Add(value.Trim());
                     }
 
-                    if ((key.Contains("seller")) && RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("name") || key.Contains("address")|| key.Contains("deli")|| key.Contains("consignee") || key.Contains("invoice to") || key.Contains("delivery") || key.Contains("shipper"))
-                    {
-                        string remainingText = value.Trim();
-                        var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
-                        if (companyMatch.Success)
-                        {
-                            extractedData.Seller.Add(companyMatch.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(companyMatch.Value, "").Trim(); // Remove extracted company name
-                        }
-                        var gstin = RegexHelper.GstinRegex.Match(value);
-                        if (gstin.Success)
-                        {
-                            extractedData.SellerGstin.Add(gstin.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(gstin.Value, "").Trim(); // Remove extracted GSTIN
-                        }
-                        var email = RegexHelper.EmailRegex.Match(value);
-                        if (email.Success)
-                        {
-                            extractedData.SellerEmail.Add(email.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(email.Value, "").Trim(); // Remove extracted Contact Number
-                        }
-                        var contactNumber = RegexHelper.MobileNumberRegex.Match(value);
-                        if (contactNumber.Success)
-                        {
-                            extractedData.SellerContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
-                        }
-                        var pinCode = RegexHelper.PinCodeRegex.Match(value);
-                        if (pinCode.Success)
-                        {
-                            extractedData.SellerPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
-                        }
-                        if (!string.IsNullOrEmpty(remainingText))
-                        {
-                            extractedData.SellerAddressLine1.Add(remainingText);
-                        }
-                    }
-                    if (key.Contains("gst") && extractedData.BuyerGstin.Count == 0)
-                    {
-                        extractedData.SellerGstin.Add(value.Trim());
-                    }
+                    //if ((key.Contains("seller")) && RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("name") || key.Contains("address")|| key.Contains("deli")|| key.Contains("consignee") || key.Contains("invoice to") || key.Contains("delivery") || key.Contains("shipper"))
+                    //{
+                    //    string remainingText = value.Trim();
+                    //    var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
+                    //    if (companyMatch.Success)
+                    //    {
+                    //        extractedData.Seller.Add(companyMatch.Value.Trim()); // ✅ Add only the matched company name
+                    //        remainingText = remainingText.Replace(companyMatch.Value, "").Trim(); // Remove extracted company name
+                    //    }
+                    //    var gstin = RegexHelper.GstinRegex.Match(value);
+                    //    if (gstin.Success)
+                    //    {
+                    //        extractedData.SellerGstin.Add(gstin.Value.Trim()); // ✅ Add only the matched company name
+                    //        remainingText = remainingText.Replace(gstin.Value, "").Trim(); // Remove extracted GSTIN
+                    //    }
+                    //    var email = RegexHelper.EmailRegex.Match(value);
+                    //    if (email.Success)
+                    //    {
+                    //        extractedData.SellerEmail.Add(email.Value.Trim()); // ✅ Add only the matched company name
+                    //        remainingText = remainingText.Replace(email.Value, "").Trim(); // Remove extracted Contact Number
+                    //    }
+                    //    var contactNumber = RegexHelper.MobileNumberRegex.Match(value);
+                    //    if (contactNumber.Success)
+                    //    {
+                    //        extractedData.SellerContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
+                    //        remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
+                    //    }
+                    //    var pinCode = RegexHelper.PinCodeRegex.Match(value);
+                    //    if (pinCode.Success)
+                    //    {
+                    //        extractedData.SellerPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
+                    //        remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
+                    //    }
+                    //    if (!string.IsNullOrEmpty(remainingText))
+                    //    {
+                    //        extractedData.SellerAddressLine1.Add(remainingText);
+                    //    }
+                    //}
+                    //if (key.Contains("gst") && extractedData.BuyerGstin.Count == 0)
+                    //{
+                    //    extractedData.SellerGstin.Add(value.Trim());
+                    //}
                     if ((key.Contains("ship")) && RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("name") || key.Contains("address") || key.Contains("ultimate consignee"))
                     {
                         string remainingText = value.Trim();
@@ -252,12 +252,12 @@ namespace PdfImageProcessor.Services
                             extractedData.ShipToContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
                             remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
                         }
-                        var pinCode = RegexHelper.PinCodeRegex.Match(value);
-                        if (pinCode.Success)
-                        {
-                            extractedData.ShipToPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
-                        }
+                        //var pinCode = RegexHelper.PinCodeRegex.Match(value);
+                        //if (pinCode.Success)
+                        //{
+                        //    extractedData.ShipToPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
+                        //    remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
+                        //}
                         if (!string.IsNullOrEmpty(remainingText))
                         {
                             extractedData.ShipToAddressLine1.Add(remainingText);
@@ -274,8 +274,8 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("vehicle no")) extractedData.VehicleNo.Add(value);
 
 
-                    if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
-                    if (key.Contains("hsn")) extractedData.HsnCode.Add(value);
+                    //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
+                    //if (key.Contains("hsn")) extractedData.HsnCode.Add(value);
                     if (key.Contains("qty") || key.Contains("quantity")) extractedData.Quantity.Add(value);
                     if (key.Contains("rate")) extractedData.Rate.Add(value);
                     if (key.Contains("cgst")) extractedData.Cgst.Add(value);
@@ -283,7 +283,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("igst")) extractedData.Igst.Add(value);
                     if (key.Contains("total amount") || key.Contains("total amt")) extractedData.TotalAmount.Add(value);
                     if (key.Contains("charg")) extractedData.TotalAmount.Add(value);
-                    if (key.Contains("declaration")) extractedData.Declaration.Add(value);
+                    //if (key.Contains("declaration")) extractedData.Declaration.Add(value);
 
                     if (key.Contains("ifs")) extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")) extractedData.BankName.Add(value);
@@ -299,7 +299,7 @@ namespace PdfImageProcessor.Services
 
             extractedData.Buyer = extractedData.Buyer.Distinct().ToList();
             extractedData.BuyerAddressLine1 = extractedData.BuyerAddressLine1.Distinct().ToList();
-            extractedData.BuyerCity = extractedData.BuyerCity.Distinct().ToList();
+            //extractedData.BuyerCity = extractedData.BuyerCity.Distinct().ToList();
             extractedData.BuyerState = extractedData.BuyerState.Distinct().ToList();
             extractedData.BuyerPinCode = extractedData.BuyerPinCode.Distinct().ToList();
             extractedData.BuyerEmail = extractedData.BuyerEmail.Distinct().ToList();
@@ -307,37 +307,37 @@ namespace PdfImageProcessor.Services
             extractedData.BuyerContactNumber = extractedData.BuyerContactNumber.Distinct().ToList();
             extractedData.BuyerGstin = extractedData.BuyerGstin.Distinct().ToList();
 
-            extractedData.Seller = extractedData.Seller.Distinct().ToList();
-            extractedData.SellerAddressLine1 = extractedData.SellerAddressLine1.Distinct().ToList();
-            extractedData.SellerCity = extractedData.SellerCity.Distinct().ToList();
-            extractedData.SellerState = extractedData.SellerState.Distinct().ToList();
-            extractedData.SellerPinCode = extractedData.SellerPinCode.Distinct().ToList();
-            extractedData.SellerEmail = extractedData.SellerEmail.Distinct().ToList();
-            extractedData.SellerContactPerson = extractedData.SellerContactPerson.Distinct().ToList();
-            extractedData.SellerContactNumber = extractedData.SellerContactNumber.Distinct().ToList();
-            extractedData.SellerGstin = extractedData.SellerGstin.Distinct().ToList();
+            //extractedData.Seller = extractedData.Seller.Distinct().ToList();
+            //extractedData.SellerAddressLine1 = extractedData.SellerAddressLine1.Distinct().ToList();
+            //extractedData.SellerCity = extractedData.SellerCity.Distinct().ToList();
+            //extractedData.SellerState = extractedData.SellerState.Distinct().ToList();
+            //extractedData.SellerPinCode = extractedData.SellerPinCode.Distinct().ToList();
+            //extractedData.SellerEmail = extractedData.SellerEmail.Distinct().ToList();
+            //extractedData.SellerContactPerson = extractedData.SellerContactPerson.Distinct().ToList();
+            //extractedData.SellerContactNumber = extractedData.SellerContactNumber.Distinct().ToList();
+            //extractedData.SellerGstin = extractedData.SellerGstin.Distinct().ToList();
 
             extractedData.ShipTo = extractedData.ShipTo.Distinct().ToList();
             extractedData.ShipToAddressLine1 = extractedData.ShipToAddressLine1.Distinct().ToList();
-            extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
-            extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
-            extractedData.ShipToPinCode = extractedData.ShipToPinCode.Distinct().ToList();
+            //extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
+            //extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
+            //extractedData.ShipToPinCode = extractedData.ShipToPinCode.Distinct().ToList();
             extractedData.ShipToEmail = extractedData.ShipToEmail.Distinct().ToList();
             extractedData.ShipToContactPerson = extractedData.ShipToContactPerson.Distinct().ToList();
             extractedData.ShipToContactNumber = extractedData.ShipToContactNumber.Distinct().ToList();
 
 
-            extractedData.DescriptionOfGoods = extractedData.DescriptionOfGoods.Distinct().ToList();
-            extractedData.HsnCode = extractedData.HsnCode.Distinct().ToList();
+            //extractedData.DescriptionOfGoods = extractedData.DescriptionOfGoods.Distinct().ToList();
+            //extractedData.HsnCode = extractedData.HsnCode.Distinct().ToList();
             extractedData.Quantity = extractedData.Quantity.Distinct().ToList();
             extractedData.Rate = extractedData.Rate.Distinct().ToList();
             extractedData.Sgst = extractedData.Sgst.Distinct().ToList();
             extractedData.Cgst = extractedData.Cgst.Distinct().ToList();
             extractedData.Igst = extractedData.Igst.Distinct().ToList();
             extractedData.TotalAmount = extractedData.TotalAmount.Distinct().ToList();
-            extractedData.AmountChargable = extractedData.AmountChargable.Distinct().ToList();
+            //extractedData.AmountChargable = extractedData.AmountChargable.Distinct().ToList();
 
-            extractedData.Declaration = extractedData.Declaration.Distinct().ToList();
+            //extractedData.Declaration = extractedData.Declaration.Distinct().ToList();
             extractedData.BankName = extractedData.BankName.Distinct().ToList();
             extractedData.IfscCode = extractedData.IfscCode.Distinct().ToList();
             extractedData.AcctNo = extractedData.AcctNo.Distinct().ToList();

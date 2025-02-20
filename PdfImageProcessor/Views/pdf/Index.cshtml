@@ -279,32 +279,133 @@
 
         $("#uploadForm").submit(); // ✅ Ensure only the form is submitted
     }
+    function getTableData() {
+        var tableData = [];
+
+        // Get main table headers
+        var headers = [];
+        $("#dataTable thead th").each(function () {
+            //headers.push($(this).attr("id").trim());  // Extract column names
+            var headerId = $(this).attr("id") ? $(this).attr("id").trim() : "";
+            headers.push(headerId);
+        });
+        headers = headers.filter(Boolean);
+
+        // Get main table rows with sub-tables
+        $("#dataTable tbody tr.main-row").each(function () {
+            var rowData = {};
+
+            // Extract main table data
+            $(this).find("td").each(function (index) {
+                var cellValue = $(this).find("input, select").length > 0 ? $(this).find("input, select").val() : $(this).text().trim();
+                //rowData[headers[index]] = cellValue; // Map headers to corresponding values
+                if (index < headers.length) {
+                    rowData[headers[index]] = cellValue;
+                }
+            });
+
+            // Find the corresponding sub-table
+            var subTable = $(this).next(".sub-table-row").find("table");
+            if (subTable.length > 0) {
+                rowData["SubTable"] = getSubTableData(subTable);
+            } else {
+                rowData["SubTable"] = []; // If no sub-table, set empty
+            }
+
+            tableData.push(rowData);
+        });
+
+        return tableData;
+    }
+
+    // Function to extract sub-table data
+    function getSubTableData(subTable) {
+        var subTableData = [];
+
+        var subHeaders = [];
+        subTable.find("thead th").each(function () {
+            subHeaders.push($(this).text().trim()); // Extract sub-table headers
+        });
+
+        subTable.find("tbody tr").each(function () {
+            var subRowData = {};
+            $(this).find("td").each(function (index) {
+                var cellValue = $(this).find("input, select").length > 0 ? $(this).find("input, select").val() : $(this).text().trim();
+                subRowData[subHeaders[index]] = cellValue;
+            });
+            subTableData.push(subRowData);
+        });
+
+        return subTableData;
+    }
+
+    // Attach to Export button
+    // $("#exportBtn").click(function () {
+    //     debugger;
+    //     var updatedTableData = getTableData(); // Get updated main table and sub-table data
+
+    //     $.ajax({
+    //         url: "/Pdf/ExportToExcel",
+    //         type: "POST",
+    //         contentType: "application/json",
+    //         data: JSON.stringify(updatedTableData),
+    //         success: function (response) {
+    //                 var filename = "ExtractedData.xlsx";
+
+    //                 // ✅ Get the correct file type
+    //                 var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
+
+    //                 // ✅ Create a download link
+    //                 var link = document.createElement("a");
+    //                 link.href = window.URL.createObjectURL(blob);
+    //                 link.download = filename;
+    //                 document.body.appendChild(link);
+    //                 link.click();
+    //                 document.body.removeChild(link);
+    //         },
+    //         error: function () {
+    //             alert("Error exporting to Excel.");
+    //         }
+    //     });
+    // });
+
     function exportToExcel(event) {
         event.preventDefault(); // Prevent unintended form submission
 
+        var updatedTableData = getTableData(); // Get updated main table and sub-table data
+
         $.ajax({
-            url: "/Pdf/ExportToExcel", // ✅ Ensure this matches the controller route
+            url: "/Pdf/ExportToExcel",
             type: "POST",
-            xhrFields: { responseType: "blob" }, // ✅ Treat response as binary file
+            contentType: "application/json",
+            data: JSON.stringify(updatedTableData),
+            xhrFields: {
+                responseType: "blob" // ✅ Ensures response is treated as a file (binary data)
+            },
             success: function (response, status, xhr) {
                 var filename = "ExtractedData.xlsx";
 
-                // ✅ Get the correct file type
+                // ✅ Create a Blob from the response data
                 var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
 
                 // ✅ Create a download link
                 var link = document.createElement("a");
                 link.href = window.URL.createObjectURL(blob);
                 link.download = filename;
+
+                // ✅ Append, Click, and Remove Link to trigger download
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+
+                // ✅ Revoke the object URL to free memory
+                window.URL.revokeObjectURL(link.href);
             },
             error: function () {
                 alert("Error exporting to Excel.");
             }
         });
-
     }
+
 
 </script>
