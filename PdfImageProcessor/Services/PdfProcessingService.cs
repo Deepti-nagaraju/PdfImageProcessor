@@ -320,6 +320,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("through") || (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
                     if (key.Contains("vehicle no")|| key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")) extractedData.Destination.Add(value);
+                    if (key.Contains("state")) extractedData.BuyerState.Add(value);
 
 
                     //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
