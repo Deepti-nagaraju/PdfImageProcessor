@@ -191,7 +191,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("ack") && ((key.Contains("no") || key.Contains("number")))) extractedData.AcknowledgeNumber.Add(value);
                     if (key.Contains("ack") && ((key.Contains("date") || key.Contains("dt")))) extractedData.AcknowledgeDate.Add(value);
 
-                    if (key.Contains("buyer") || key.Contains("bill to") || key.Contains("customer") || key.Contains("name") || key.Contains("address")|| key.Contains("billed to")|| key.Contains("consignor"))
+                    if (key.Contains("buyer") || key.Contains("bill to") || key.Contains("customer") || key.Contains("address")|| key.Contains("billed to")|| key.Contains("consignor"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -278,7 +278,7 @@ namespace PdfImageProcessor.Services
                     //{
                     //    extractedData.SellerGstin.Add(value.Trim());
                     //}
-                    if ((key.Contains("ship")) && RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("name") || key.Contains("address") || key.Contains("ultimate consignee"))
+                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("address") || key.Contains("ultimate consignee"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -321,7 +321,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("through") || (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
                     if (key.Contains("vehicle no")|| key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")) extractedData.Destination.Add(value);
-                    if (key.Contains("state")) extractedData.BuyerState.Add(value);
+                    if (key.Contains("state")|| key.Contains("place")) extractedData.BuyerState.Add(value);
 
 
                     //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
@@ -341,8 +341,8 @@ namespace PdfImageProcessor.Services
 
                     if (key.Contains("ifs")) extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")) extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct")|| key.Contains("account")|| key.Contains("a/c")) extractedData.AcctNo.Add(value);
-                    if (key.Contains("eway")) extractedData.EWayBill.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c")|| key.Contains("acct number")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("eway")|| key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
@@ -371,9 +371,9 @@ namespace PdfImageProcessor.Services
 
                 }
             }
-            var emails = RegexHelper.EmailRegex.Matches(result.Content)
-                                 .Select(match => match.Value)
-                                 .ToList();
+            var emails = RegexHelper.EmailRegex.Matches(result.Content).Select(match => match.Value).ToList();
+            var companyNames = RegexHelper.CompanyNameRegex.Matches(result.Content).Select(match => match.Value).ToList();
+
             if (extractedData.BuyerEmail.Count==0)
             {
                 extractedData.BuyerEmail = emails;
@@ -381,6 +381,10 @@ namespace PdfImageProcessor.Services
             if(extractedData.ShipToEmail.Count==0)
             {
                 extractedData.ShipToEmail = emails;
+            }
+            if(extractedData.Buyer.Count==0)
+            {
+                extractedData.Buyer = companyNames;
             }
 
             // Ensure unique values for each field
