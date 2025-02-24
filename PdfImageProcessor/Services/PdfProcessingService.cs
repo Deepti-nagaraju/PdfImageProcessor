@@ -229,6 +229,7 @@ namespace PdfImageProcessor.Services
                             extractedData.BuyerAddressLine1.Add(remainingText);
                         }
                     }
+                   
 
                     if (key.Contains("gst") && extractedData.BuyerGstin.Count == 0)
                     {
@@ -343,6 +344,43 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("account number") || key.Contains("acct")|| key.Contains("account")|| key.Contains("a/c")) extractedData.AcctNo.Add(value);
                     if (key.Contains("eway")) extractedData.EWayBill.Add(value);
                 }
+            }
+            //After scanning through all key value pairs gain scan through for capturing special cases
+            foreach (var field in result.KeyValuePairs)
+            {
+                var key = field.Key?.Content?.Trim().ToLower() ?? "";
+                var value = field.Value?.Content?.Trim() ?? "";
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    if(extractedData.BuyerContactNumber.Count==0)
+                    {
+                        if(key=="t"||key=="m"||key.Contains("mobile")||key.Contains("telephone") || (key.Contains("contact") && RegexHelper.HasNumbersRegex.IsMatch(value)))
+                        {
+                            extractedData.BuyerContactNumber.Add(value);
+                        }
+                        
+                    }
+                    if (extractedData.ShipToContactNumber.Count == 0)
+                    {                      
+                        if (key == "t" || key == "m" || key.Contains("mobile") || key.Contains("telephone")||(key.Contains("contact")&& RegexHelper.HasNumbersRegex.IsMatch(value)))
+                        {
+                            extractedData.ShipToContactNumber.Add(value);
+                        }
+                    }
+
+                }
+            }
+            var emails = RegexHelper.EmailRegex.Matches(result.Content)
+                                 .Select(match => match.Value)
+                                 .ToList();
+            if (extractedData.BuyerEmail.Count==0)
+            {
+                extractedData.BuyerEmail = emails;
+            }
+            if(extractedData.ShipToEmail.Count==0)
+            {
+                extractedData.ShipToEmail = emails;
             }
 
             // Ensure unique values for each field

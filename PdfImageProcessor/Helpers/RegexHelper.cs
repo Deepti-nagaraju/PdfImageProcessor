@@ -6,7 +6,9 @@ namespace PdfImageProcessor.Utilities
     public static class RegexHelper
     {
         // ✅ Mobile Number (India)
-        public static readonly Regex MobileNumberRegex = new(@"\b(\+91[\s-]?)?[6-9]\d{9}\b", RegexOptions.IgnoreCase);
+        //public static readonly Regex MobileNumberRegex = new(@"\b(\+91[\s-]?)?[6-9]\d{9}\b", RegexOptions.IgnoreCase);
+        public static readonly Regex MobileNumberRegex = new(@"\b((\+\d{1,3}[\s-]?)?[6-9]\d{9}|\+\d{1,3}\s\d{3,4}\s\d{3}\s\d{3})\b", RegexOptions.IgnoreCase);
+
 
         // ✅ Email Address
         public static readonly Regex EmailRegex = new(@"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", RegexOptions.IgnoreCase);
@@ -46,6 +48,7 @@ namespace PdfImageProcessor.Utilities
 
         // ✅ City Name (Assumes it starts with a capital letter)
         public static readonly Regex CityRegex = new(@"\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)*\b", RegexOptions.IgnoreCase);
+        public static readonly Regex HasNumbersRegex = new(@"\d");
 
         // ✅ Valid Table Headers Check
         public static bool IsValidTableHeader(string header)
