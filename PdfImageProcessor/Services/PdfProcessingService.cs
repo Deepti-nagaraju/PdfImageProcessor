@@ -40,8 +40,8 @@ namespace PdfImageProcessor.Services
                 decimal totalTax = 0;
                 decimal totalQuantity = 0;
                 decimal totalRate = 0;
-                extractedData.ExtractedTables = StructureExtractedTables(result,out totalAmount,out totalRate,out totalQuantity);
-                ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity);
+                extractedData.ExtractedTables = StructureExtractedTables(result,out totalAmount,out totalRate,out totalQuantity,out decimal cgst,out decimal sgst,out decimal igst);
+                ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
 
                 extractedDataList.Add(extractedData);
             }
@@ -77,13 +77,16 @@ namespace PdfImageProcessor.Services
 
         //    return tables;
         //}
-        public static List<TableModel> StructureExtractedTables(AnalyzeResult result, out decimal totalAmount, out decimal totalRate,  out decimal totalQuantity)
+        public static List<TableModel> StructureExtractedTables(AnalyzeResult result, out decimal totalAmount, out decimal totalRate,  out decimal totalQuantity,out decimal sgst, out decimal cgst, out decimal igst)
         {
             //List<TableModel> extractedTables = result.Tables;
             var structuredTables = new List<TableModel>();
             totalAmount = 0;
             totalQuantity = 0;
             totalRate = 0;
+            sgst = 0;
+            cgst = 0;
+            igst = 0;
 
             foreach (var table in result.Tables)
             {
@@ -116,9 +119,12 @@ namespace PdfImageProcessor.Services
                         var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
                         var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
                         var amount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" }, new List<string> { "" }));
+                        var cgstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
+                        var sgstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
+                        var igstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
 
-                        // ✅ Convert cleaned values to decimal for summing
-                        decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
+                    // ✅ Convert cleaned values to decimal for summing
+                    decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
                         totalAmount += amountValue;
 
                         decimal rateValue = decimal.TryParse(ratePer, out decimal rate) ? rate : 0;
@@ -127,22 +133,28 @@ namespace PdfImageProcessor.Services
                         decimal qtyValue = decimal.TryParse(quantity, out decimal qty) ? qty : 0;
                         totalQuantity += qtyValue;
 
+                        decimal cgstValue = decimal.TryParse(cgstFetch, out decimal cgstOut) ? cgstOut : 0;
+                        cgstValue += cgstValue;
+                        decimal sgstValue = decimal.TryParse(sgstFetch, out decimal sgstOut) ? sgstOut : 0;
+                        sgstValue += sgstValue;
+                        decimal igstValue = decimal.TryParse(igstFetch, out decimal igstOut) ? igstOut : 0;
+                        igstValue += igstValue;
 
                         var mappedRow = new List<string>
                         {
                             serialNumber.ToString(),  // Sl No
                             GetColumnValue(row, headers, new List<string> { "Description","Item","Product","Model","Vessel" },new List<string> { "" }),
                             GetColumnValue(row, headers, new List<string> { "HSN","Item Code","SAC","code" },new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" },new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per","Price","MRP" },new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "tax","value"},new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate" }),
-                            GetColumnValue(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate" }),
-                            GetColumnValue(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"}),
-                            GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate"}),
-                            GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate"}),
-                            GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"}),
-                            GetColumnValue(row, headers, new List<string> { "Amount", "Amt" },new List<string> { "" })
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" },new List<string> { "" })),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per","Price","MRP" },new List<string> { "" })),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "tax","value"},new List<string> { "" })),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate" })),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate" })),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"})),
+                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate"})),
+                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate"})),
+                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"})),
+                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" },new List<string> { "" }))
                         };
 
                         structuredTable.Rows.Add(mappedRow);
@@ -162,6 +174,11 @@ namespace PdfImageProcessor.Services
             int index = headers.FindIndex(h => possibleHeadersPrimary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase))&& possibleHeadersSecondary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)));
             return (index >= 0 && index < row.Count) ? row[index] : "";
         }
+        private static string GetColumnValueForGST(List<string> row, List<string> headers, List<string> possibleHeadersPrimary, List<string> possibleHeadersSecondary)
+        {
+            int index = headers.FindIndex(h => possibleHeadersPrimary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)) && possibleHeadersSecondary.Any(ph => !h.Contains(ph, StringComparison.OrdinalIgnoreCase)));
+            return (index >= 0 && index < row.Count) ? row[index] : "";
+        }
         private static string GetColumnValueForTaxAmount(List<string> row, List<string> headers, List<string> possibleHeadersPrimary, List<string> possibleHeadersSecondary)
         {
             int index = headers.FindIndex(h => possibleHeadersPrimary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)) && !possibleHeadersSecondary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)));
@@ -177,13 +194,14 @@ namespace PdfImageProcessor.Services
 
 
 
-        private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData,decimal totalAmount, decimal totalRate,decimal totalQuantity)
+        private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData,decimal totalAmount, decimal totalRate,decimal totalQuantity, decimal cgst, decimal sgst, decimal igst)
         {
             
             foreach (var field in result.KeyValuePairs)
             {
                 var key = field.Key?.Content?.Trim().ToLower() ?? "";
                 var value = field.Value?.Content?.Trim() ?? "";
+                var valueToCheck = field.Value?.Content?.Trim().ToLower() ?? "";
 
                 if (!string.IsNullOrEmpty(value))
                 {
@@ -337,11 +355,15 @@ namespace PdfImageProcessor.Services
                     extractedData.Rate.Add(totalRate.ToString());
                     extractedData.TotalAmount.Add(totalAmount.ToString());
                     extractedData.Quantity.Add(totalQuantity.ToString());
+                    extractedData.Cgst.Add(cgst.ToString());
+                    extractedData.Sgst.Add(sgst.ToString());
+                    extractedData.Igst.Add(igst.ToString());
 
 
                     if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("rtgs code"))extractedData.IfscCode.Add(value);
-                    if (key.Contains("bank")|| key.Contains("bank name"))  extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")|| key.Contains("a/c")|| key.Contains("acct number")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("bank")|| key.Contains("bank name")|| valueToCheck.Contains("bank"))  
+                        extractedData.BankName.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")|| key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
                     if (key.Contains("eway")|| key.Contains("E Way bill no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
                 }
             }

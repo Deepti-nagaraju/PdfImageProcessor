@@ -72,7 +72,7 @@
                                 {
                                     <option value="@data.Irn.First()" selected>@data.Irn.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Irn)
+                                @foreach (var item in data.Irn.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -84,7 +84,7 @@
                                 {
                                     <option value="@data.AcknowledgeNumber.First()" selected>@data.AcknowledgeNumber.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.AcknowledgeNumber)
+                                @foreach (var item in data.AcknowledgeNumber.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -96,7 +96,7 @@
                                 {
                                     <option value="@data.AcknowledgeDate.First()" selected>@data.AcknowledgeDate.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.AcknowledgeDate)
+                                @foreach (var item in data.AcknowledgeDate.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -108,7 +108,7 @@
                                 {
                                     <option value="@data.Buyer.First()" selected>@data.Buyer.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Buyer)
+                                @foreach (var item in data.Buyer.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -120,7 +120,7 @@
                                 {
                                     <option value="@data.BuyerGstin.First()" selected>@data.BuyerGstin.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerGstin)
+                                @foreach (var item in data.BuyerGstin.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -132,7 +132,7 @@
                                 {
                                     <option value="@data.BuyerAddressLine1.First()" selected>@data.BuyerAddressLine1.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerAddressLine1)
+                                @foreach (var item in data.BuyerAddressLine1.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -144,7 +144,7 @@
                                 {
                                     <option value="@data.BuyerState.First()" selected>@data.BuyerState.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerState)
+                                @foreach (var item in data.BuyerState.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -159,7 +159,7 @@
                             {
                                     <option value="@data.BuyerPinCode.First()" selected>@data.BuyerPinCode.First()</option> <!-- First value as default -->
                             } <!-- Default empty option -->
-                            @foreach (var item in data.BuyerPinCode)
+                                @foreach (var item in data.BuyerPinCode.Skip(1))
                             {
                                     <option value="@item">@item</option>
                             }
@@ -171,7 +171,7 @@
                                 {
                                     <option value="@data.BuyerContactPerson.First()" selected>@data.BuyerContactPerson.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerContactPerson)
+                                @foreach (var item in data.BuyerContactPerson.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -183,7 +183,7 @@
                                 {
                                     <option value="@data.BuyerContactNumber.First()" selected>@data.BuyerContactNumber.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerContactNumber)
+                                @foreach (var item in data.BuyerContactNumber.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -195,7 +195,7 @@
                                 {
                                     <option value="@data.BuyerEmail.First()" selected>@data.BuyerEmail.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BuyerEmail)
+                                @foreach (var item in data.BuyerEmail.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -219,7 +219,7 @@
                                 {
                                     <option value="@data.ShipToAddressLine1.First()" selected>@data.ShipToAddressLine1.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.ShipToAddressLine1)
+                                @foreach (var item in data.ShipToAddressLine1.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -231,7 +231,7 @@
                                 {
                                     <option value="@data.ShipToContactPerson.First()" selected>@data.ShipToContactPerson.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.ShipToContactPerson)
+                                @foreach (var item in data.ShipToContactPerson.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -243,7 +243,7 @@
                                 {
                                     <option value="@data.ShipToContactNumber.First()" selected>@data.ShipToContactNumber.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.ShipToContactNumber)
+                                @foreach (var item in data.ShipToContactNumber.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -255,7 +255,7 @@
                                 {
                                     <option value="@data.ShipToEmail.First()" selected>@data.ShipToEmail.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.ShipToEmail)
+                                @foreach (var item in data.ShipToEmail.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -267,7 +267,7 @@
                             {
                                     <option value="@data.InvoiceNumber.First()" selected>@data.InvoiceNumber.First()</option> <!-- First value as default -->
                             } <!-- Default empty option -->
-                            @foreach (var item in data.InvoiceNumber)
+                                @foreach (var item in data.InvoiceNumber.Skip(1))
                             {
                                     <option value="@item">@item</option>
                             }
@@ -279,7 +279,7 @@
                                 {
                                     <option value="@data.InvoiceDate.First()" selected>@data.InvoiceDate.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.InvoiceDate)
+                                @foreach (var item in data.InvoiceDate.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -291,7 +291,7 @@
                                 {
                                     <option value="@data.EWayBill.First()" selected>@data.EWayBill.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.EWayBill)
+                                @foreach (var item in data.EWayBill.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -303,7 +303,7 @@
                                 {
                                     <option value="@data.DeleiveryNote.First()" selected>@data.DeleiveryNote.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.DeleiveryNote)
+                                @foreach (var item in data.DeleiveryNote.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -315,7 +315,7 @@
                                 {
                                     <option value="@data.TermsOfPayment.First()" selected>@data.TermsOfPayment.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.TermsOfPayment)
+                                @foreach (var item in data.TermsOfPayment.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -327,7 +327,7 @@
                                 {
                                     <option value="@data.DespatchDocNo.First()" selected>@data.DespatchDocNo.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.DespatchDocNo)
+                                @foreach (var item in data.DespatchDocNo.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -339,7 +339,7 @@
                             {
                                     <option value="@data.DespatchThrough.First()" selected>@data.DespatchThrough.First()</option> <!-- First value as default -->
                             } <!-- Default empty option -->
-                            @foreach (var item in data.DespatchThrough)
+                            @foreach (var item in data.DespatchThrough.Skip(1))
                             {
                                     <option value="@item">@item</option>
                             }
@@ -351,7 +351,7 @@
                                 {
                                     <option value="@data.Destination.First()" selected>@data.Destination.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Destination)
+                                @foreach (var item in data.Destination.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -363,7 +363,7 @@
                                 {
                                     <option value="@data.VehicleNo.First()" selected>@data.VehicleNo.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.VehicleNo)
+                                @foreach (var item in data.VehicleNo.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -375,7 +375,7 @@
                                 {
                                     <option value="@data.Quantity.First()" selected>@data.Quantity.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Quantity)
+                                @foreach (var item in data.Quantity.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -387,7 +387,7 @@
                                 {
                                     <option value="@data.Rate.First()" selected>@data.Rate.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Rate)
+                                @foreach (var item in data.Rate.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -399,7 +399,7 @@
                                 {
                                     <option value="@data.Cgst.First()" selected>@data.Cgst.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Cgst)
+                                @foreach (var item in data.Cgst.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -411,7 +411,7 @@
                                 {
                                     <option value="@data.Sgst.First()" selected>@data.Sgst.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Sgst)
+                                @foreach (var item in data.Sgst.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -423,7 +423,7 @@
                                 {
                                     <option value="@data.Igst.First()" selected>@data.Igst.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.Igst)
+                                @foreach (var item in data.Igst.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -435,7 +435,7 @@
                                 {
                                     <option value="@data.TotalAmount.First()" selected>@data.TotalAmount.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.TotalAmount)
+                                @foreach (var item in data.TotalAmount.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -447,7 +447,7 @@
                                 {
                                     <option value="@data.BankName.First()" selected>@data.BankName.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.BankName)
+                                @foreach (var item in data.BankName.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -459,7 +459,7 @@
                                 {
                                     <option value="@data.AcctNo.First()" selected>@data.AcctNo.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.AcctNo)
+                                @foreach (var item in data.AcctNo.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
@@ -471,7 +471,7 @@
                                 {
                                     <option value="@data.IfscCode.First()" selected>@data.IfscCode.First()</option> <!-- First value as default -->
                                 } <!-- Default empty option -->
-                                @foreach (var item in data.IfscCode)
+                                @foreach (var item in data.IfscCode.Skip(1))
                                 {
                                     <option value="@item">@item</option>
                                 }
