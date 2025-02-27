@@ -331,13 +331,13 @@ namespace PdfImageProcessor.Services
                     }
 
 
-                    if (key.Contains("invoice number") ||  key.Contains("invoice number & date")||key.Contains("invoice serial number")|| key.Contains("proforma no ")|| key.Contains("invoice #")||key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
+                    if (key.Contains("invoice number") || key.Contains("inv.no")||key.Contains("document no")||key.Contains("invoice number & date")||key.Contains("invoice serial number")|| key.Contains("proforma no ")|| key.Contains("invoice #")||key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
                     if (key.Contains("date")) extractedData.InvoiceDate.Add(value);
                     if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
-                    if (key.Contains("despatch") && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
+                    if (key.Contains("despatch") && ((key.Contains("number") || key.Contains("despatch doc no")|| key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
                     if (key.Contains("through") || (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
-                    if (key.Contains("vehicle no")|| key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
+                    if (key.Contains("vehicle no") || key.Contains("vehical no")||key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
                     if (key.Contains("state")|| key.Contains("place")) extractedData.BuyerState.Add(value);
 
@@ -363,8 +363,8 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("rtgs code"))extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")|| key.Contains("bank name")|| valueToCheck.Contains("bank"))  
                         extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")|| key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
-                    if (key.Contains("eway")|| key.Contains("E Way bill no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank a/c")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("eway")|| key.Contains("e Way bill no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
@@ -376,7 +376,7 @@ namespace PdfImageProcessor.Services
                 if (!string.IsNullOrEmpty(value))
                 {
                     
-                        if(key=="t"||key=="m"||key.Contains("mobile")||key.Contains("telephone") || (key.Contains("contact") && RegexHelper.HasNumbersRegex.IsMatch(value)))
+                        if(key == "t" || key == "m" || key.Contains("cell no")||key.Contains("mobile") || key.Contains("telephone") || key.Contains("tel/mob") || key.Contains("phone") || key.Contains("telephone") ||(key.Contains("contact") && RegexHelper.HasNumbersRegex.IsMatch(value)))
                         {
                             extractedData.BuyerContactNumber.Add(value);
                         }
@@ -384,7 +384,7 @@ namespace PdfImageProcessor.Services
                     
                     
                                          
-                        if (key == "t" || key == "m" || key.Contains("mobile") || key.Contains("telephone")||(key.Contains("contact")&& RegexHelper.HasNumbersRegex.IsMatch(value)))
+                        if (key == "t" || key == "m" || key.Contains("cell no") ||key.Contains("mobile") || key.Contains("telephone")|| key.Contains("phone")||(key.Contains("contact")&& RegexHelper.HasNumbersRegex.IsMatch(value)))
                         {
                             extractedData.ShipToContactNumber.Add(value);
                         }
