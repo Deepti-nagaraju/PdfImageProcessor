@@ -209,7 +209,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("ack") && ((key.Contains("no") || key.Contains("number")))) extractedData.AcknowledgeNumber.Add(value);
                     if (key.Contains("ack") && ((key.Contains("date") || key.Contains("dt")))) extractedData.AcknowledgeDate.Add(value);
 
-                    if (key.Contains("buyer") || key.Contains("bill to") || key.Contains("customer") || key.Contains("address")|| key.Contains("billed to")|| key.Contains("consignor"))
+                    if (key.Contains("buyer") || key.Contains("consigners name")|| key.Contains("dell at")||key.Contains("bill to") || key.Contains("customer") || key.Contains("address")|| key.Contains("billed to")|| key.Contains("consignor"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -236,6 +236,7 @@ namespace PdfImageProcessor.Services
                             extractedData.BuyerContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
                             remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
                         }
+
                         var pinCode = RegexHelper.PinCodeRegex.Match(value);
                         if (pinCode.Success)
                         {
@@ -296,7 +297,7 @@ namespace PdfImageProcessor.Services
                     //{
                     //    extractedData.SellerGstin.Add(value.Trim());
                     //}
-                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("address") || key.Contains("ultimate consignee"))
+                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("consignee")|| key.Contains("shipped to")||key.Contains("address") || key.Contains("ultimate consignee"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -331,16 +332,17 @@ namespace PdfImageProcessor.Services
                     }
 
 
-                    if (key.Contains("invoice number") || key.Contains("inv.no")||key.Contains("document no")||key.Contains("invoice number & date")||key.Contains("invoice serial number")|| key.Contains("proforma no ")|| key.Contains("invoice #")||key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
-                    if (key.Contains("date")) extractedData.InvoiceDate.Add(value);
+                    if (key.Contains("invoice number") || key.Contains("bill no")|| key.Contains("inv.no")||key.Contains("document no")||key.Contains("invoice serial number")|| key.Contains("proforma no ")|| key.Contains("invoice #")||key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
+                    if (key.Contains("date") || key.Contains("invoice no & date"))extractedData.InvoiceDate.Add(value);
                     if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
-                    if (key.Contains("despatch") && ((key.Contains("number") || key.Contains("despatch doc no")|| key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
-                    if (key.Contains("through") || (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
+                    if ((key.Contains("despatch")|| key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
+                    if (key.Contains("through") | (key.Contains("transport name")) | (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
                     if (key.Contains("vehicle no") || key.Contains("vehical no")||key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
-                    if (key.Contains("state")|| key.Contains("place")) extractedData.BuyerState.Add(value);
-
+                    if (key.Contains("state") || key.Contains("slate name") ||key.Contains("place")) extractedData.BuyerState.Add(value);
+                    if (key.Contains("contact person")|| (key.Contains("contact")))  extractedData.BuyerContactPerson.Add(value);
+                    if (key.Contains("contact person") || (key.Contains("contact"))) extractedData.ShipToContactPerson.Add(value);
 
                     //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
                     //if (key.Contains("hsn")) extractedData.HsnCode.Add(value);
@@ -360,11 +362,11 @@ namespace PdfImageProcessor.Services
                     extractedData.Igst.Add(igst.ToString());
 
 
-                    if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("rtgs code"))extractedData.IfscCode.Add(value);
-                    if (key.Contains("bank")|| key.Contains("bank name")|| valueToCheck.Contains("bank"))  
+                    if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("rtgs/ifcs code"))extractedData.IfscCode.Add(value);
+                    if (key.Contains("bank")|| key.Contains("bank details") ||key.Contains("bank name")|| valueToCheck.Contains("bank"))  
                         extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank a/c")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
-                    if (key.Contains("eway")|| key.Contains("e Way bill no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
+                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
+                    if (key.Contains("eway")|| key.Contains("e way bill no")|| key.Contains("ewb no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
