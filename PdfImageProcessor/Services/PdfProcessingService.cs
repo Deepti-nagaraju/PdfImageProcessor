@@ -209,7 +209,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("ack") && ((key.Contains("no") || key.Contains("number")))) extractedData.AcknowledgeNumber.Add(value);
                     if (key.Contains("ack") && ((key.Contains("date") || key.Contains("dt")))) extractedData.AcknowledgeDate.Add(value);
 
-                    if (key.Contains("buyer") || key.Contains("consigners name")|| key.Contains("dell at")||key.Contains("bill to") || key.Contains("customer") || key.Contains("address")|| key.Contains("billed to")|| key.Contains("consignor"))
+                    if (key.Contains("buyer") || key.Contains("consigners name") || key.Contains("dell at") || key.Contains("bill to") || key.Contains("customer") || key.Contains("address") || key.Contains("billed to") || key.Contains("consignor"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -248,7 +248,7 @@ namespace PdfImageProcessor.Services
                             extractedData.BuyerAddressLine1.Add(remainingText);
                         }
                     }
-                   
+
 
                     if (key.Contains("gst"))
                     {
@@ -297,7 +297,7 @@ namespace PdfImageProcessor.Services
                     //{
                     //    extractedData.SellerGstin.Add(value.Trim());
                     //}
-                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("consignee")|| key.Contains("shipped to")||key.Contains("address") || key.Contains("ultimate consignee"))
+                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("consignee") || key.Contains("shipped to") || key.Contains("address") || key.Contains("ultimate consignee"))
                     {
                         string remainingText = value.Trim();
                         var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
@@ -332,17 +332,20 @@ namespace PdfImageProcessor.Services
                     }
 
 
-                    if (key.Contains("invoice number") || key.Contains("bill no")|| key.Contains("inv.no")||key.Contains("document no")||key.Contains("invoice serial number")|| key.Contains("proforma no ")|| key.Contains("invoice #")||key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
-                    if (key.Contains("date") || key.Contains("invoice no & date"))extractedData.InvoiceDate.Add(value);
+                    if (key.Contains("invoice number") ||key.Contains("invoice")|| key.Contains("bill no") || key.Contains("inv.no") || key.Contains("document no") || key.Contains("invoice serial number") || key.Contains("proforma no ") || key.Contains("invoice #") || key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
+                    if (key.Contains("date") || key.Contains("invoice no & date")) extractedData.InvoiceDate.Add(value);
                     if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
-                    if ((key.Contains("despatch")|| key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
-                    if (key.Contains("through") | (key.Contains("transport name")) | (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
+                    if ((key.Contains("despatch") || key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
+                    if (key.Contains("through") | (key.Contains(":\n"))|(key.Contains("transport name")) | (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
                     if (key.Contains("vehicle no") || key.Contains("vehical no")||key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
                     if (key.Contains("state") || key.Contains("slate name") ||key.Contains("place")) extractedData.BuyerState.Add(value);
-                    if (key.Contains("contact person")|| (key.Contains("contact")))  extractedData.BuyerContactPerson.Add(value);
-                    if (key.Contains("contact person") || (key.Contains("contact"))) extractedData.ShipToContactPerson.Add(value);
+                    if (key.Contains("contact person")||(key.Contains("contact")))  extractedData.BuyerContactPerson.Add(value);
+                    if (key.Contains("contact person") || (key.Contains("attn"))||(key.Contains("contact"))) extractedData.ShipToContactPerson.Add(value);
+                    if (key.Contains("survey no")) extractedData.BuyerAddressLine1.Add(value);
+                    if (key.Contains("survey no")) extractedData.ShipToAddressLine1.Add(value);
+
 
                     //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
                     //if (key.Contains("hsn")) extractedData.HsnCode.Add(value);
@@ -366,7 +369,7 @@ namespace PdfImageProcessor.Services
                     if (key.Contains("bank")|| key.Contains("bank details") ||key.Contains("bank name")|| valueToCheck.Contains("bank"))  
                         extractedData.BankName.Add(value);
                     if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
-                    if (key.Contains("eway")|| key.Contains("e way bill no")|| key.Contains("ewb no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
+                    if (key.Contains("eway")|| key.Contains("e way bill no") || key.Contains("bill no")||key.Contains("ewb no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
@@ -412,18 +415,63 @@ namespace PdfImageProcessor.Services
 
             // Ensure unique values for each field
             extractedData.Irn = extractedData.Irn.Distinct().ToList();
+            if(extractedData.Irn.Count ==0)
+            {
+                extractedData.Irn.Add("NA");
+            }
+
             extractedData.AcknowledgeNumber = extractedData.AcknowledgeNumber.Distinct().ToList();
+            if (extractedData.AcknowledgeNumber.Count == 0)
+            {
+                extractedData.AcknowledgeNumber.Add("NA");
+            }
             extractedData.AcknowledgeDate = extractedData.AcknowledgeDate.Distinct().ToList();
+            if (extractedData.AcknowledgeDate.Count == 0)
+            {
+                extractedData.AcknowledgeDate.Add("NA");
+            }
 
             extractedData.Buyer = extractedData.Buyer.Distinct().ToList();
+            if (extractedData.Buyer.Count == 0)
+            {
+                extractedData.Buyer.Add("NA");
+            }
             extractedData.BuyerAddressLine1 = extractedData.BuyerAddressLine1.Distinct().ToList();
+            if (extractedData.BuyerAddressLine1.Count == 0)
+            {
+                extractedData.BuyerAddressLine1.Add("NA");
+            }
             //extractedData.BuyerCity = extractedData.BuyerCity.Distinct().ToList();
             extractedData.BuyerState = extractedData.BuyerState.Distinct().ToList();
+            if (extractedData.BuyerState.Count == 0)
+            {
+                extractedData.BuyerState.Add("NA");
+            }
             extractedData.BuyerPinCode = extractedData.BuyerPinCode.Distinct().ToList();
+            if (extractedData.BuyerPinCode.Count == 0)
+            {
+                extractedData.BuyerPinCode.Add("NA");
+            }
             extractedData.BuyerEmail = extractedData.BuyerEmail.Distinct().ToList();
+            if (extractedData.BuyerEmail.Count == 0)
+            {
+                extractedData.BuyerEmail.Add("NA");
+            }
             extractedData.BuyerContactPerson = extractedData.BuyerContactPerson.Distinct().ToList();
+            if (extractedData.BuyerContactPerson.Count == 0)
+            {
+                extractedData.BuyerContactPerson.Add("NA");
+            }
             extractedData.BuyerContactNumber = extractedData.BuyerContactNumber.Distinct().ToList();
+            if (extractedData.BuyerContactNumber.Count == 0)
+            {
+                extractedData.BuyerContactNumber.Add("NA");
+            }
             extractedData.BuyerGstin = extractedData.BuyerGstin.Distinct().ToList();
+            if (extractedData.BuyerGstin.Count == 0)
+            {
+                extractedData.BuyerGstin.Add("NA");
+            }
 
             //extractedData.Seller = extractedData.Seller.Distinct().ToList();
             //extractedData.SellerAddressLine1 = extractedData.SellerAddressLine1.Distinct().ToList();
@@ -436,31 +484,116 @@ namespace PdfImageProcessor.Services
             //extractedData.SellerGstin = extractedData.SellerGstin.Distinct().ToList();
 
             extractedData.ShipTo = extractedData.ShipTo.Distinct().ToList();
+            if (extractedData.ShipTo.Count == 0)
+            {
+                extractedData.ShipTo.Add("NA");
+            }
             extractedData.ShipToAddressLine1 = extractedData.ShipToAddressLine1.Distinct().ToList();
+            if (extractedData.ShipToAddressLine1.Count == 0)
+            {
+                extractedData.ShipToAddressLine1.Add("NA");
+            }
             //extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
             //extractedData.ShipToCity = extractedData.ShipToCity.Distinct().ToList();
             //extractedData.ShipToPinCode = extractedData.ShipToPinCode.Distinct().ToList();
             extractedData.ShipToEmail = extractedData.ShipToEmail.Distinct().ToList();
+            if (extractedData.ShipToEmail.Count == 0)
+            {
+                extractedData.ShipToEmail.Add("NA");
+            }
             extractedData.ShipToContactPerson = extractedData.ShipToContactPerson.Distinct().ToList();
+            if (extractedData.ShipToContactPerson.Count == 0)
+            {
+                extractedData.ShipToContactPerson.Add("NA");
+            }
             extractedData.ShipToContactNumber = extractedData.ShipToContactNumber.Distinct().ToList();
+            if (extractedData.ShipToContactNumber.Count == 0)
+            {
+                extractedData.ShipToContactNumber.Add("NA");
+            }
 
 
             //extractedData.DescriptionOfGoods = extractedData.DescriptionOfGoods.Distinct().ToList();
             //extractedData.HsnCode = extractedData.HsnCode.Distinct().ToList();
             extractedData.Quantity = extractedData.Quantity.Distinct().ToList();
+            if (extractedData.Quantity.Count == 0)
+            {
+                extractedData.Quantity.Add("NA");
+            }
             extractedData.Rate = extractedData.Rate.Distinct().ToList();
+            if (extractedData.Rate.Count == 0)
+            {
+                extractedData.Rate.Add("NA");
+            }
             extractedData.Sgst = extractedData.Sgst.Distinct().ToList();
+            if (extractedData.Sgst.Count == 0)
+            {
+                extractedData.Sgst.Add("NA");
+            }
             extractedData.Cgst = extractedData.Cgst.Distinct().ToList();
+            if (extractedData.Cgst.Count == 0)
+            {
+                extractedData.Cgst.Add("NA");
+            }
             extractedData.Igst = extractedData.Igst.Distinct().ToList();
+            if (extractedData.Igst.Count == 0)
+            {
+                extractedData.Igst.Add("NA");
+            }
             extractedData.TotalAmount = extractedData.TotalAmount.Distinct().ToList();
+            if (extractedData.TotalAmount.Count == 0)
+            {
+                extractedData.TotalAmount.Add("NA");
+            }
             //extractedData.AmountChargable = extractedData.AmountChargable.Distinct().ToList();
 
             //extractedData.Declaration = extractedData.Declaration.Distinct().ToList();
             extractedData.BankName = extractedData.BankName.Distinct().ToList();
+            if (extractedData.BankName.Count == 0)
+            {
+                extractedData.BankName.Add("NA");
+            }
             extractedData.IfscCode = extractedData.IfscCode.Distinct().ToList();
+            if (extractedData.IfscCode.Count == 0)
+            {
+                extractedData.IfscCode.Add("NA");
+            }
             extractedData.AcctNo = extractedData.AcctNo.Distinct().ToList();
+            if (extractedData.AcctNo.Count == 0)
+            {
+                extractedData.AcctNo.Add("NA");
+            }
 
             extractedData.EWayBill = extractedData.EWayBill.Distinct().ToList();
+            if (extractedData.EWayBill.Count == 0)
+            {
+                extractedData.EWayBill.Add("NA");
+            }
+            extractedData.DeleiveryNote = extractedData.DeleiveryNote.Distinct().ToList();
+            if (extractedData.DeleiveryNote.Count == 0)
+            {
+                extractedData.DeleiveryNote.Add("NA");
+            }
+            extractedData.TermsOfPayment = extractedData.TermsOfPayment.Distinct().ToList();
+            if (extractedData.TermsOfPayment.Count == 0)
+            {
+                extractedData.TermsOfPayment.Add("NA");
+            }
+            extractedData.DespatchDocNo = extractedData.DespatchDocNo.Distinct().ToList();
+            if (extractedData.DespatchDocNo.Count == 0)
+            {
+                extractedData.DespatchDocNo.Add("NA");
+            }
+            extractedData.DespatchThrough = extractedData.DespatchThrough.Distinct().ToList();
+            if (extractedData.DespatchThrough.Count == 0)
+            {
+                extractedData.DespatchThrough.Add("NA");
+            }
+            extractedData.VehicleNo = extractedData.VehicleNo.Distinct().ToList();
+            if (extractedData.VehicleNo.Count == 0)
+            {
+                extractedData.VehicleNo.Add("NA");
+            }
         }
     }
 }
