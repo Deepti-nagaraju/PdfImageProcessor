@@ -16,8 +16,8 @@ namespace PdfImageProcessor.Services
 {
     public class PdfProcessingService
     {
-        private const string Endpoint = "https://deepti.cognitiveservices.azure.com/";
-        private const string ApiKey = "3lUsGeSbyFujvN5DM45mYggERcTBcob26fhxqwSSXixhWi1PMwkhJQQJ99BBACGhslBXJ3w3AAALACOGVVET";
+        private const string Endpoint = "https://vrtekh-doc-int.cognitiveservices.azure.com/";
+        private const string ApiKey = "GIsd8NQSsh9VKgyDHRR457U1dFCrP1v4WPxWVplu6SwP4hURjbwdJQQJ99BCACGhslBXJ3w3AAALACOGJ8Ad";
 
         private readonly DocumentAnalysisClient _client;
 
