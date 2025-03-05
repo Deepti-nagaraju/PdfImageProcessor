@@ -73,7 +73,7 @@ namespace PdfImageProcessor.Controllers
                        "Buyer","Buyer GSTIN", "Buyer Address","Buyer State", "Buyer Pin", "Buyer Contact", "Buyer Contact Number", "Buyer Email",
                       "Ship To", "Ship To Address", "Ship To Contact Person", "Ship To Contact Number","Ship to Email",
                       "Invoice Number", "Invoice Date","Eway Bill Number", "Delivery Note", "Terms of Payment",
-                      "Despatch Doc No", "Despatch Through", "Destination", "Vehicle No",
+                      "Despatch Doc No", "Despatch Through", "Destination", "Vehicle No","Description of Goods","HSN code",
                       "Quantity", "Rate", "CGST", "SGST","IGST",
                       "Total Amount", "Bank Name","Account No", "IFSC Code"
                      };
@@ -124,16 +124,20 @@ namespace PdfImageProcessor.Controllers
                 worksheet.Cells[row, 25].Value = string.Join(", ", mainRow.Destination);
                 worksheet.Cells[row, 26].Value = string.Join(", ", mainRow.VehicleNo);
 
-                worksheet.Cells[row, 27].Value = string.Join(", ", mainRow.Quantity);
-                worksheet.Cells[row, 28].Value = string.Join(", ", mainRow.Rate);
-                worksheet.Cells[row, 29].Value = string.Join(", ", mainRow.Cgst);
-                worksheet.Cells[row, 30].Value = string.Join(", ", mainRow.Sgst);
-                worksheet.Cells[row, 31].Value = string.Join(", ", mainRow.Igst);
-                worksheet.Cells[row, 32].Value = string.Join(", ", mainRow.TotalAmount);
+                worksheet.Cells[row, 27].Value = string.Join(", ", mainRow.DescriptionOfGoods);
+                worksheet.Cells[row, 28].Value = string.Join(", ", mainRow.HsnCode);
 
-                worksheet.Cells[row, 33].Value = string.Join(", ", mainRow.BankName);
-                worksheet.Cells[row, 34].Value = string.Join(", ", mainRow.AcctNo);
-                worksheet.Cells[row, 35].Value = string.Join(", ", mainRow.IfscCode);
+
+                worksheet.Cells[row, 29].Value = string.Join(", ", mainRow.Quantity);
+                worksheet.Cells[row, 30].Value = string.Join(", ", mainRow.Rate);
+                worksheet.Cells[row, 31].Value = string.Join(", ", mainRow.Cgst);
+                worksheet.Cells[row, 32].Value = string.Join(", ", mainRow.Sgst);
+                worksheet.Cells[row, 33].Value = string.Join(", ", mainRow.Igst);
+                worksheet.Cells[row, 34].Value = string.Join(", ", mainRow.TotalAmount);
+
+                worksheet.Cells[row, 35].Value = string.Join(", ", mainRow.BankName);
+                worksheet.Cells[row, 36].Value = string.Join(", ", mainRow.AcctNo);
+                worksheet.Cells[row, 37].Value = string.Join(", ", mainRow.IfscCode);
                 row++;
 
                 // ✅ Check if SubTable is present and properly deserialized

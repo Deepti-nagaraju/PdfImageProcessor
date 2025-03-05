@@ -47,6 +47,8 @@ namespace PdfImageProcessor.Models
         public List<string> DespatchThrough { get; set; } = new();
         public List<string> Destination { get; set; } = new();
         public List<string> VehicleNo { get; set; } = new();
+        public List<string> DescriptionOfGoods { get; set; } = new();
+        public List<string> HsnNo { get; set; } = new();
         public List<string> Quantity { get; set; } = new();
         public List<string> Rate { get; set; } = new();
         public List<string> Sgst { get; set; } = new();
@@ -55,7 +57,7 @@ namespace PdfImageProcessor.Models
         public List<string> TotalAmount { get; set; } = new();
         public List<string> BankName { get; set; } = new();
         public List<string> IfscCode { get; set; } = new();
-        public List<string> AcctNo { get; set; } = new();
+        public List<string> AcctNo { get; set; } = new();   
 
         public List<TableModel> ExtractedTables { get; set; } = new();
         public List<Dictionary<string, string>> SubTable { get; set; } = new();
@@ -102,6 +104,8 @@ namespace PdfImageProcessor.Models
         public string? DespatchThrough { get; set; } 
         public string? Destination { get; set; } 
         public string? VehicleNo { get; set; } 
+        public string? DescriptionOfGoods {  get; set; }
+        public string? HsnCode {  get; set; }
         public string? Quantity { get; set; } 
         public string? Rate { get; set; } 
         public string? Sgst { get; set; } 

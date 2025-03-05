@@ -47,6 +47,8 @@
                 <th style="min-width: 180px;" id="DespatchThrough">Despatch Through</th>
                 <th style="min-width: 180px;" id="Destination">Destination</th>
                 <th style="min-width: 150px;" id="VehicleNo">Vehicle No</th>
+                <th style="min-width: 150px;" id="DescriptionOfGoods">Description Of Goods</th>
+                <th style="min-width: 150px;" id="HsnCode">HSN Code</th>
                 <th style="min-width: 120px;" id="Quantity">Quantity</th>
                 <th style="min-width: 120px;" id="Rate">Rate</th>
                 <th style="min-width: 120px;" id="Cgst">CGST</th>
@@ -368,7 +370,31 @@
                                     <option value="@item">@item</option>
                                 }
                             </select>
-                        </td>            
+                        </td>
+                        <td>
+                            <select class="form-control" name="descGoods" id="descGoodsDropdown">
+                                @if (data.DescriptionOfGoods != null && data.DescriptionOfGoods.Any())
+                                {
+                                    <option value="@data.DescriptionOfGoods.First()" selected>@data.DescriptionOfGoods.First()</option> <!-- First value as default -->
+                                } <!-- Default empty option -->
+                                @foreach (var item in data.DescriptionOfGoods.Skip(1))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control" name="hsnNo" id="hsnDropdown">
+                                @if (data.HsnNo != null && data.HsnNo.Any())
+                                {
+                                    <option value="@data.HsnNo.First()" selected>@data.HsnNo.First()</option> <!-- First value as default -->
+                                } <!-- Default empty option -->
+                                @foreach (var item in data.HsnNo.Skip(1))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
                         <td>
                             <select class="form-control" name="qty" id="qtyDropdown">
                                 @if (data.Quantity != null && data.Quantity.Any())

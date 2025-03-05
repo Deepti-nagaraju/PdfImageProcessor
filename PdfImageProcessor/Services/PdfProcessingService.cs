@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static PdfImageProcessor.Controllers.PdfController;
+using System.Reflection.PortableExecutable;
 
 namespace PdfImageProcessor.Services
 {
@@ -119,9 +120,9 @@ namespace PdfImageProcessor.Services
                         var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
                         var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
                         var amount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" }, new List<string> { "" }));
-                        var cgstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
-                        var sgstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
-                        var igstFetch = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
+                        var cgstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
+                        var sgstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
+                        var igstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
 
                     // ✅ Convert cleaned values to decimal for summing
                     decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
@@ -134,11 +135,11 @@ namespace PdfImageProcessor.Services
                         totalQuantity += qtyValue;
 
                         decimal cgstValue = decimal.TryParse(cgstFetch, out decimal cgstOut) ? cgstOut : 0;
-                        cgstValue += cgstValue;
+                        cgst += cgstValue;
                         decimal sgstValue = decimal.TryParse(sgstFetch, out decimal sgstOut) ? sgstOut : 0;
-                        sgstValue += sgstValue;
+                        sgst += sgstValue;
                         decimal igstValue = decimal.TryParse(igstFetch, out decimal igstOut) ? igstOut : 0;
-                        igstValue += igstValue;
+                        igst += igstValue;
 
                         var mappedRow = new List<string>
                         {
@@ -176,7 +177,7 @@ namespace PdfImageProcessor.Services
         }
         private static string GetColumnValueForGST(List<string> row, List<string> headers, List<string> possibleHeadersPrimary, List<string> possibleHeadersSecondary)
         {
-            int index = headers.FindIndex(h => possibleHeadersPrimary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)) && possibleHeadersSecondary.Any(ph => !h.Contains(ph, StringComparison.OrdinalIgnoreCase)));
+            int index = headers.FindIndex(h => possibleHeadersPrimary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)) && !possibleHeadersSecondary.Any(ph => h.Contains(ph, StringComparison.OrdinalIgnoreCase)));
             return (index >= 0 && index < row.Count) ? row[index] : "";
         }
         private static string GetColumnValueForTaxAmount(List<string> row, List<string> headers, List<string> possibleHeadersPrimary, List<string> possibleHeadersSecondary)
@@ -593,6 +594,16 @@ namespace PdfImageProcessor.Services
             if (extractedData.VehicleNo.Count == 0)
             {
                 extractedData.VehicleNo.Add("NA");
+            }
+            if(extractedData.ExtractedTables!= null && extractedData.ExtractedTables.FirstOrDefault().Rows.Count!=0 && extractedData.ExtractedTables.FirstOrDefault().Rows.Count==1)
+            {
+                extractedData.DescriptionOfGoods.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[1]);
+                extractedData.HsnNo.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[2]);
+            }
+            else
+            {
+                extractedData.DescriptionOfGoods.Add("Refer table");
+                extractedData.HsnNo.Add("Refer table");
             }
         }
     }
