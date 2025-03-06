@@ -144,8 +144,8 @@ namespace PdfImageProcessor.Services
                         var mappedRow = new List<string>
                         {
                             serialNumber.ToString(),  // Sl No
-                            GetColumnValue(row, headers, new List<string> { "Description","Item","Product","Model","Vessel" },new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "HSN","Item Code","SAC","code" },new List<string> { "" }),
+                            GetColumnValue(row, headers, new List<string> { "Description","Item","Product","Model","Vessel" ,"particulars"},new List<string> { "" }),
+                            GetColumnValue(row, headers, new List<string> { "HSN","Item Code","SAC","code"},new List<string> { "" }),
                             CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" },new List<string> { "" })),
                             CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per","Price","MRP" },new List<string> { "" })),
                             CleanNumericValue(GetColumnValue(row, headers, new List<string> { "tax","value"},new List<string> { "" })),
@@ -333,7 +333,7 @@ namespace PdfImageProcessor.Services
                     }
 
 
-                    if (key.Contains("invoice number") ||key.Contains("invoice")|| key.Contains("bill no") || key.Contains("inv.no") || key.Contains("document no") || key.Contains("invoice serial number") || key.Contains("proforma no ") || key.Contains("invoice #") || key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
+                    if (key.Contains("invoice number") ||key.Contains("invoice")||key.Contains("pi no") || key.Contains("bill no") || key.Contains("inv.no") || key.Contains("inovice no\n:") || key.Contains("document no") || key.Contains("invoice serial number") || key.Contains("proforma no ") || key.Contains("invoice #") || key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
                     if (key.Contains("date") || key.Contains("invoice no & date")) extractedData.InvoiceDate.Add(value);
                     if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
@@ -366,7 +366,7 @@ namespace PdfImageProcessor.Services
                     extractedData.Igst.Add(igst.ToString());
 
 
-                    if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("rtgs/ifcs code"))extractedData.IfscCode.Add(value);
+                    if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("account no")||key.Contains("rtgs/ifcs code"))extractedData.IfscCode.Add(value);
                     if (key.Contains("bank")|| key.Contains("bank details") ||key.Contains("bank name")|| valueToCheck.Contains("bank"))  
                         extractedData.BankName.Add(value);
                     if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
@@ -595,7 +595,7 @@ namespace PdfImageProcessor.Services
             {
                 extractedData.VehicleNo.Add("NA");
             }
-            if(extractedData.ExtractedTables!= null && extractedData.ExtractedTables.FirstOrDefault().Rows.Count!=0 && extractedData.ExtractedTables.FirstOrDefault().Rows.Count==1)
+            if(extractedData.ExtractedTables!= null && extractedData.ExtractedTables.Count!=0 && extractedData.ExtractedTables.FirstOrDefault().Rows.Count==1)
             {
                 extractedData.DescriptionOfGoods.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[1]);
                 extractedData.HsnNo.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[2]);
