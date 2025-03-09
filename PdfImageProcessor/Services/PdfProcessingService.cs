@@ -595,7 +595,7 @@ namespace PdfImageProcessor.Services
             {
                 extractedData.VehicleNo.Add("NA");
             }
-            if(extractedData.ExtractedTables!= null && extractedData.ExtractedTables.FirstOrDefault().Rows.Count!=0 && extractedData.ExtractedTables.FirstOrDefault().Rows.Count==1)
+            if(extractedData.ExtractedTables!= null && extractedData.ExtractedTables.Count!=0 && extractedData.ExtractedTables.FirstOrDefault().Rows.Count==1)
             {
                 extractedData.DescriptionOfGoods.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[1]);
                 extractedData.HsnNo.Add(extractedData.ExtractedTables.FirstOrDefault().Rows.FirstOrDefault()[2]);
