@@ -208,7 +208,6 @@
     <p>Processing... Please wait.</p>
 </div>
 
-
     <!-- Page Content -->
 <div class="main-content">
     <div class="upload-title">Upload Your Invoices</div>
@@ -245,7 +244,33 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    //var previewSrc = null;
+    var previewSrcArray = null;
     $(document).ready(function () {
+
+
+        //pdfFile preview
+        const fileElement = document.getElementById("pdfFile");
+        fileElement.addEventListener("change", loadURL);
+        function loadURL() {
+            previewSrcArray = [];
+            const files = Array.from(fileElement.files);
+            if (files) {
+                for (let x in files){
+                    var filename = files[x].name;
+                    console.log("file name: " + filename);
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewSrcArray[filename] = e.target.result;
+                    };
+                    reader.readAsDataURL(files[x]);
+                }
+            }
+        }
+
+
+
+
         // Ensure only one submit event is bound to the form
         $("#uploadForm").off("submit").on("submit", function (event) {
             event.preventDefault(); // Prevent default form submission
