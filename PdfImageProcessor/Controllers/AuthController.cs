@@ -89,11 +89,11 @@ namespace PdfImageProcessor.Controllers
                 else
                 {
                     Console.WriteLine("User already exists!");
-                    return StatusCode(401, "User already exists!");
+                    return StatusCode(501, "User already exists!");
                 }
             }
             Console.WriteLine("Passwords do not match!");
-            return StatusCode(401, "Passwords do not match!");
+            return StatusCode(501, "Passwords do not match!");
         }
 
 
@@ -134,7 +134,7 @@ namespace PdfImageProcessor.Controllers
                 {
                     if (passwordHash[index] != userPasswordHash[index])
                     {
-                        return StatusCode(401, "Incorrect password!");
+                        return StatusCode(501, "Incorrect password!");
                     }
                 }
 
@@ -144,7 +144,7 @@ namespace PdfImageProcessor.Controllers
             }
             else
             {
-                return StatusCode(401, "Username not found!");
+                return StatusCode(501, "Username not found!");
             }
         }
 
