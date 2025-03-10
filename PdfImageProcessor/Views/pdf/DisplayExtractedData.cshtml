@@ -6,17 +6,19 @@
     // ✅ Get unique values for each dropdown across all files
     Func<List<string>, List<string>> getUnique = values => values?.Distinct().ToList() ?? new List<string>();
 }
+
+
 <!-- Export to Excel Button -->
 <div>
     <a href="javascript:void(0);"
-       style="margin: 10px 0; font-size: 16px; text-decoration: underline; color: blue; cursor: pointer;"
-       id="exportBtn" onclick="exportToExcel(event)">
+        style="margin: 10px 0; font-size: 16px; text-decoration: underline; color: blue; cursor: pointer;"
+        id="exportBtn" onclick="exportToExcel(event)">
         Export to Excel
     </a>
 
 </div>
 <div class="table-area table-responsive"
-     style="overflow-x: auto; max-width: 100%; white-space: nowrap; min-width: 100%;">
+    style="overflow-x: auto; max-width: 100%; white-space: nowrap; min-width: 100%;">
 
     <table class="table table-bordered" id="dataTable">
         <thead>
@@ -58,7 +60,7 @@
                 <th style="min-width: 200px;" id="BankName">Bank Name</th>
                 <th style="min-width: 150px;" id="AcctNo">Account No</th>
                 <th style="min-width: 150px;" id="IfscCode">IFSC Code</th>
-               @*  <th style="min-width: 180px;" id="">Actions</th> *@
+                @*  <th style="min-width: 180px;" id="">Actions</th> *@
             </tr>
         </thead>
         <tbody>
@@ -67,443 +69,483 @@
                 @foreach (var data in Model)
                 {
                     <tr style="background-color: @(Model.IndexOf(data) % 2 == 0 ? "#f9f9f9" : "white");" class="main-row">
-                        <td> <span class="toggle-link" onclick="toggleTable('@data.FileName')">@data.FileName</span></td>
+                        <td>
+                            <span class="toggle-link" onclick="showPdfPreview('@data.FileName')">@data.FileName</span>&nbsp;
+                            &nbsp;
+                            <span class="toggle-link" onclick="toggleTable('@data.FileName')">Details</span>
+                        </td>
                         <td>
                             <select class="form-control" name="irn" id="irnDropdown">
                                 @if (data.Irn != null && data.Irn.Any())
                                 {
-                                    <option value="@data.Irn.First()" selected>@data.Irn.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Irn.First()" selected>@data.Irn.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Irn.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="ackno" id="acknoDropdown">
                                 @if (data.AcknowledgeNumber != null && data.AcknowledgeNumber.Any())
                                 {
-                                    <option value="@data.AcknowledgeNumber.First()" selected>@data.AcknowledgeNumber.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.AcknowledgeNumber.First()" selected>@data.AcknowledgeNumber.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.AcknowledgeNumber.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="ack date" id="ackDateDropdown">
+                            <select class="form-control" name="ack date" id="ackDateDropdown">
                                 @if (data.AcknowledgeDate != null && data.AcknowledgeDate.Any())
                                 {
-                                    <option value="@data.AcknowledgeDate.First()" selected>@data.AcknowledgeDate.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.AcknowledgeDate.First()" selected>@data.AcknowledgeDate.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.AcknowledgeDate.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="buyer" id="buyerDropdown">
+                            <select class="form-control" name="buyer" id="buyerDropdown">
                                 @if (data.Buyer != null && data.Buyer.Any())
                                 {
-                                    <option value="@data.Buyer.First()" selected>@data.Buyer.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Buyer.First()" selected>@data.Buyer.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Buyer.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="buyerGSTIN" id="buyerGSTINDropdown">
                                 @if (data.BuyerGstin != null && data.BuyerGstin.Any())
                                 {
-                                    <option value="@data.BuyerGstin.First()" selected>@data.BuyerGstin.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerGstin.First()" selected>@data.BuyerGstin.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerGstin.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="address" id="addressDropdown">
                                 @if (data.BuyerAddressLine1 != null && data.BuyerAddressLine1.Any())
                                 {
-                                    <option value="@data.BuyerAddressLine1.First()" selected>@data.BuyerAddressLine1.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerAddressLine1.First()" selected>@data.BuyerAddressLine1.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerAddressLine1.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="state" id="stateDropdown">
                                 @if (data.BuyerState != null && data.BuyerState.Any())
                                 {
-                                    <option value="@data.BuyerState.First()" selected>@data.BuyerState.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerState.First()" selected>@data.BuyerState.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerState.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
-                       
-                       
-                        
+
+
+
                         <td>
                             <select class="form-control" name="pincode" id="pincodeDropdown">
-                            @if (data.BuyerPinCode != null && data.BuyerPinCode.Any())
-                            {
-                                    <option value="@data.BuyerPinCode.First()" selected>@data.BuyerPinCode.First()</option> <!-- First value as default -->
-                            } <!-- Default empty option -->
+                                @if (data.BuyerPinCode != null && data.BuyerPinCode.Any())
+                                {
+                                    <option value="@data.BuyerPinCode.First()" selected>@data.BuyerPinCode.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerPinCode.Skip(1))
-                            {
-                                    <option value="@item">@item</option>
-                            }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="contact" id="contactDropdown">
+                            <select class="form-control" name="contact" id="contactDropdown">
                                 @if (data.BuyerContactPerson != null && data.BuyerContactPerson.Any())
                                 {
-                                    <option value="@data.BuyerContactPerson.First()" selected>@data.BuyerContactPerson.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerContactPerson.First()" selected>@data.BuyerContactPerson.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerContactPerson.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="contactno" id="contactnoDropdown">
+                            <select class="form-control" name="contactno" id="contactnoDropdown">
                                 @if (data.BuyerContactNumber != null && data.BuyerContactNumber.Any())
                                 {
-                                    <option value="@data.BuyerContactNumber.First()" selected>@data.BuyerContactNumber.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerContactNumber.First()" selected>@data.BuyerContactNumber.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerContactNumber.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="email" id="emailDropdown">
                                 @if (data.BuyerEmail != null && data.BuyerEmail.Any())
                                 {
-                                    <option value="@data.BuyerEmail.First()" selected>@data.BuyerEmail.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BuyerEmail.First()" selected>@data.BuyerEmail.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BuyerEmail.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="shipto" id="shiptoDropdown">
                                 @if (data.ShipTo != null && data.ShipTo.Any())
                                 {
-                                    <option value="@data.ShipTo.First()" selected>@data.ShipTo.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.ShipTo.First()" selected>@data.ShipTo.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.ShipTo)
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="shiptoaddress" id="shiptoaddressDropdown">
                                 @if (data.ShipToAddressLine1 != null && data.ShipToAddressLine1.Any())
                                 {
-                                    <option value="@data.ShipToAddressLine1.First()" selected>@data.ShipToAddressLine1.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.ShipToAddressLine1.First()" selected>@data.ShipToAddressLine1.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.ShipToAddressLine1.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="shipcontact" id="shipcontactDropdown">
+                            <select class="form-control" name="shipcontact" id="shipcontactDropdown">
                                 @if (data.ShipToContactPerson != null && data.ShipToContactPerson.Any())
                                 {
-                                    <option value="@data.ShipToContactPerson.First()" selected>@data.ShipToContactPerson.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.ShipToContactPerson.First()" selected>@data.ShipToContactPerson.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.ShipToContactPerson.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="contactno" id="contactnoDropdown">
                                 @if (data.ShipToContactNumber != null && data.ShipToContactNumber.Any())
                                 {
-                                    <option value="@data.ShipToContactNumber.First()" selected>@data.ShipToContactNumber.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.ShipToContactNumber.First()" selected>@data.ShipToContactNumber.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.ShipToContactNumber.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="email" id="emailDropdown">
                                 @if (data.ShipToEmail != null && data.ShipToEmail.Any())
                                 {
-                                    <option value="@data.ShipToEmail.First()" selected>@data.ShipToEmail.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.ShipToEmail.First()" selected>@data.ShipToEmail.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.ShipToEmail.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="invoice" id="invoiceDropdown">
-                            @if (data.InvoiceNumber != null && data.InvoiceNumber.Any())
-                            {
-                                    <option value="@data.InvoiceNumber.First()" selected>@data.InvoiceNumber.First()</option> <!-- First value as default -->
-                            } <!-- Default empty option -->
+                                @if (data.InvoiceNumber != null && data.InvoiceNumber.Any())
+                                {
+                                    <option value="@data.InvoiceNumber.First()" selected>@data.InvoiceNumber.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.InvoiceNumber.Skip(1))
-                            {
-                                    <option value="@item">@item</option>
-                            }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="invoice date" id="invoicedateDropdown">
+                            <select class="form-control" name="invoice date" id="invoicedateDropdown">
                                 @if (data.InvoiceDate != null && data.InvoiceDate.Any())
                                 {
-                                    <option value="@data.InvoiceDate.First()" selected>@data.InvoiceDate.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.InvoiceDate.First()" selected>@data.InvoiceDate.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.InvoiceDate.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="ebill" id="ebillDropdown">
                                 @if (data.EWayBill != null && data.EWayBill.Any())
                                 {
-                                    <option value="@data.EWayBill.First()" selected>@data.EWayBill.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.EWayBill.First()" selected>@data.EWayBill.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.EWayBill.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="note" id="noteDropdown">
+                            <select class="form-control" name="note" id="noteDropdown">
                                 @if (data.DeleiveryNote != null && data.DeleiveryNote.Any())
                                 {
-                                    <option value="@data.DeleiveryNote.First()" selected>@data.DeleiveryNote.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.DeleiveryNote.First()" selected>@data.DeleiveryNote.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.DeleiveryNote.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                           <select class="form-control" name="payment" id="paymentDropdown">
+                            <select class="form-control" name="payment" id="paymentDropdown">
                                 @if (data.TermsOfPayment != null && data.TermsOfPayment.Any())
                                 {
-                                    <option value="@data.TermsOfPayment.First()" selected>@data.TermsOfPayment.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.TermsOfPayment.First()" selected>@data.TermsOfPayment.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.TermsOfPayment.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="doc no" id="docnoDropdown">
+                            <select class="form-control" name="doc no" id="docnoDropdown">
                                 @if (data.DespatchDocNo != null && data.DespatchDocNo.Any())
                                 {
-                                    <option value="@data.DespatchDocNo.First()" selected>@data.DespatchDocNo.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.DespatchDocNo.First()" selected>@data.DespatchDocNo.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.DespatchDocNo.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="despatch" id="despatchDropdown">
-                            @if (data.DespatchThrough != null && data.DespatchThrough.Any())
-                            {
-                                    <option value="@data.DespatchThrough.First()" selected>@data.DespatchThrough.First()</option> <!-- First value as default -->
-                            } <!-- Default empty option -->
-                            @foreach (var item in data.DespatchThrough.Skip(1))
-                            {
-                                    <option value="@item">@item</option>
-                            }
+                                @if (data.DespatchThrough != null && data.DespatchThrough.Any())
+                                {
+                                    <option value="@data.DespatchThrough.First()" selected>@data.DespatchThrough.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
+                                @foreach (var item in data.DespatchThrough.Skip(1))
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="destination" id="destinationDropdown">
+                            <select class="form-control" name="destination" id="destinationDropdown">
                                 @if (data.Destination != null && data.Destination.Any())
                                 {
-                                    <option value="@data.Destination.First()" selected>@data.Destination.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Destination.First()" selected>@data.Destination.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Destination.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="vehicle no" id="vehiclenoDropdown">
+                            <select class="form-control" name="vehicle no" id="vehiclenoDropdown">
                                 @if (data.VehicleNo != null && data.VehicleNo.Any())
                                 {
-                                    <option value="@data.VehicleNo.First()" selected>@data.VehicleNo.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.VehicleNo.First()" selected>@data.VehicleNo.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.VehicleNo.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="descGoods" id="descGoodsDropdown">
                                 @if (data.DescriptionOfGoods != null && data.DescriptionOfGoods.Any())
                                 {
-                                    <option value="@data.DescriptionOfGoods.First()" selected>@data.DescriptionOfGoods.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.DescriptionOfGoods.First()" selected>@data.DescriptionOfGoods.First()
+                                    </option> <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.DescriptionOfGoods.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="hsnNo" id="hsnDropdown">
                                 @if (data.HsnNo != null && data.HsnNo.Any())
                                 {
-                                    <option value="@data.HsnNo.First()" selected>@data.HsnNo.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.HsnNo.First()" selected>@data.HsnNo.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.HsnNo.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="qty" id="qtyDropdown">
                                 @if (data.Quantity != null && data.Quantity.Any())
                                 {
-                                    <option value="@data.Quantity.First()" selected>@data.Quantity.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Quantity.First()" selected>@data.Quantity.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Quantity.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="rate" id="rateDropdown">
+                            <select class="form-control" name="rate" id="rateDropdown">
                                 @if (data.Rate != null && data.Rate.Any())
                                 {
-                                    <option value="@data.Rate.First()" selected>@data.Rate.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Rate.First()" selected>@data.Rate.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Rate.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="cgst" id="cgstDropdown">
                                 @if (data.Cgst != null && data.Cgst.Any())
                                 {
-                                    <option value="@data.Cgst.First()" selected>@data.Cgst.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Cgst.First()" selected>@data.Cgst.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Cgst.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
-                             <select class="form-control" name="sgst" id="sgstDropdown">
+                            <select class="form-control" name="sgst" id="sgstDropdown">
                                 @if (data.Sgst != null && data.Sgst.Any())
                                 {
-                                    <option value="@data.Sgst.First()" selected>@data.Sgst.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Sgst.First()" selected>@data.Sgst.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Sgst.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="igst" id="igstDropdown">
                                 @if (data.Igst != null && data.Igst.Any())
                                 {
-                                    <option value="@data.Igst.First()" selected>@data.Igst.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.Igst.First()" selected>@data.Igst.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.Igst.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="amount" id="amountDropdown">
                                 @if (data.TotalAmount != null && data.TotalAmount.Any())
                                 {
-                                    <option value="@data.TotalAmount.First()" selected>@data.TotalAmount.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.TotalAmount.First()" selected>@data.TotalAmount.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.TotalAmount.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="bank name" id="banknameDropdown">
                                 @if (data.BankName != null && data.BankName.Any())
                                 {
-                                    <option value="@data.BankName.First()" selected>@data.BankName.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.BankName.First()" selected>@data.BankName.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.BankName.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="acct no" id="acctnoDropdown">
                                 @if (data.AcctNo != null && data.AcctNo.Any())
                                 {
-                                    <option value="@data.AcctNo.First()" selected>@data.AcctNo.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.AcctNo.First()" selected>@data.AcctNo.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.AcctNo.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
                         <td>
                             <select class="form-control" name="ifsc" id="ifscDropdown">
                                 @if (data.IfscCode != null && data.IfscCode.Any())
                                 {
-                                    <option value="@data.IfscCode.First()" selected>@data.IfscCode.First()</option> <!-- First value as default -->
-                                } <!-- Default empty option -->
+                                    <option value="@data.IfscCode.First()" selected>@data.IfscCode.First()</option>
+                                    <!-- First value as default -->
+                                } < !--Default empty option -->
                                 @foreach (var item in data.IfscCode.Skip(1))
-                                {
-                                    <option value="@item">@item</option>
-                                }
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
                             </select>
                         </td>
-                      
+
                     </tr>
                     <tr id="table-@data.FileName" class="hidden-table sub-table-row">
                         <td colspan="5">
@@ -528,9 +570,9 @@
                                                     <tr>
                                                         @foreach (var cell in row)
                                                         {
-                                                        <td>
-                                                            <input type="text" class="form-control editable-cell" value="@cell" />
-                                                        </td>
+                                                            <td>
+                                                                <input type="text" class="form-control editable-cell" value="@cell" />
+                                                            </td>
                                                         }
                                                     </tr>
                                                 }
@@ -556,7 +598,10 @@
             }
         </tbody>
     </table>
-    </div>
+</div>
+
+<object id="preview" class="pdf" data="" height="700" style="margin: 5% 10%;width:80%;">
+</object>
 
 <script>
     function toggleTable(fileName) {
@@ -569,6 +614,7 @@
             tableRow.classList.add("hidden-table");
         }
     }
+    function showPdfPreview(fileName) {
+        $('#preview').attr('data', previewSrcArray[fileName]);
+    }
 </script>
-
-
