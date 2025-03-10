@@ -600,8 +600,12 @@
     </table>
 </div>
 
-<object id="preview" class="pdf" data="" height="700" style="margin: 5% 10%;width:80%;">
-</object>
+<object id="previewPdf" data="" type="application/pdf" height="700"
+    style="margin: 5% 10%;width:80%;display:none;"></object>
+<object id="previewJpeg" data="" type="image/jpeg" height="700" style="margin: 5% 10%;width:80%;display:none;"></object>
+<object id="previewPng" data="" type="image/png" height="700" style="margin: 5% 10%;width:80%;display:none;"></object>
+<!--iframe id="preview" height="700" style="margin: 5% 10%;width:80%;"></iframe-->
+<!--embed id="preview" type="image/jpeg" height="700" style="margin: 5% 10%;width:80%;" /-->
 
 <script>
     function toggleTable(fileName) {
@@ -614,7 +618,24 @@
             tableRow.classList.add("hidden-table");
         }
     }
+
     function showPdfPreview(fileName) {
-        $('#preview').attr('data', previewSrcArray[fileName]);
+        document.getElementById("previewPdf").style.display = 'none';
+        document.getElementById("previewJpeg").style.display = 'none';
+        document.getElementById("previewPng").style.display = 'none';
+
+        var previewObjId = null;
+        if (previewFileType[fileName] == 'application/pdf') {
+            previewObjId = document.getElementById("previewPdf");
+        } else if (previewFileType[fileName] == 'image/jpeg') {
+            previewObjId = document.getElementById("previewJpeg");
+        } else if (previewFileType[fileName] == 'image/png') {
+            previewObjId = document.getElementById("previewPng");
+        }
+
+        previewObjId.style.display = 'block';
+        previewObjId.data = previewFileData[fileName];
+        //$('#preview').attr('data', previewFileData[fileName]);
+
     }
 </script>

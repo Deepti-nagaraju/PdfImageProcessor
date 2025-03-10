@@ -244,8 +244,9 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    //var previewSrc = null;
-    var previewSrcArray = null;
+    var previewFileData = null;
+    var previewFileType = null;
+    var allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     $(document).ready(function () {
 
 
@@ -253,15 +254,24 @@
         const fileElement = document.getElementById("pdfFile");
         fileElement.addEventListener("change", loadURL);
         function loadURL() {
-            previewSrcArray = [];
+            previewFileData = [];
+            previewFileType = [];
             const files = Array.from(fileElement.files);
             if (files) {
                 for (let x in files){
                     var filename = files[x].name;
                     console.log("file name: " + filename);
+                    console.log("file type: " + files[x].type);
+                    previewFileType[filename] = files[x].type;
+                    //validate uploaded file type
+                    if (!allowedTypes.includes(files[x].type)) {
+                        alert('Invalid file type. Please upload a JPEG, PNG, or PDF file.');
+                        //document.getElementById('pdfFile').value = '';
+                        fileElement.value = '';
+                    }
                     var reader = new FileReader();
                     reader.onload = function(e) {
-                        previewSrcArray[filename] = e.target.result;
+                        previewFileData[filename] = e.target.result;
                     };
                     reader.readAsDataURL(files[x]);
                 }
