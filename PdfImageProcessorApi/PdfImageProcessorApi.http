@@ -1,0 +1,6 @@
+@PdfImageProcessorApi_HostAddress = http://localhost:5091
+
+GET {{PdfImageProcessorApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

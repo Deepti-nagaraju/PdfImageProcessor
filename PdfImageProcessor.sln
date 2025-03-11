@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfImageProcessor", "PdfImageProcessor\PdfImageProcessor.csproj", "{DBB10BA5-7548-41E7-B35F-D00E4E3E1D3F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfImageProcessorApi", "PdfImageProcessorApi\PdfImageProcessorApi.csproj", "{EE41E9EE-C8BC-4DC8-B741-32F44747E409}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DBB10BA5-7548-41E7-B35F-D00E4E3E1D3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBB10BA5-7548-41E7-B35F-D00E4E3E1D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBB10BA5-7548-41E7-B35F-D00E4E3E1D3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE41E9EE-C8BC-4DC8-B741-32F44747E409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE41E9EE-C8BC-4DC8-B741-32F44747E409}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE41E9EE-C8BC-4DC8-B741-32F44747E409}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE41E9EE-C8BC-4DC8-B741-32F44747E409}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
