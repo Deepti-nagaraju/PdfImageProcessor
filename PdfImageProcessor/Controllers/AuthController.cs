@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,149 +12,137 @@ namespace PdfImageProcessor.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
-    public class AuthController : ControllerBase
+    [Route("auth")]
+    public class AuthController : Controller
     {
         private readonly AuthHelper _authHelper;
+
         public AuthController(IConfiguration config)
         {
             _authHelper = new AuthHelper(config);
         }
 
-
-        [AllowAnonymous]            //Allows request without authentication(JWT token)
-        [HttpPost("RegisterUser")]
-        public IActionResult RegisterUser(RegisterUserDto registerUserDto)
+        // ✅ Route to Login Page (View)
+        [AllowAnonymous]
+        [HttpGet("Login")]
+        public IActionResult Login()
         {
-            //1. Check password mismatch
-            if (registerUserDto.Password == registerUserDto.PasswordConfirm)
-            {
-                // 2. Check if user already exist or not
-                bool userFound = false;
-                string usersJson = System.IO.File.ReadAllText("Users.txt");
-                if (usersJson != null)
-                {
-                    usersJson = "[" + usersJson + "]";
-                    IEnumerable<User>? users = JsonConvert.DeserializeObject<IEnumerable<User>>(usersJson);
-                    if (users != null)
-                    {
-                        foreach (User user in users)
-                        {
-                            if (user.UserName == registerUserDto.UserName)
-                            {
-                                userFound = true;
-                            }
-                        }
-                    }
-                }
-
-                if (!userFound)
-                {
-                    Console.WriteLine("Creating user..");
-
-                    // 3. Generate a password salt to create a passwordHash
-                    byte[] passwordSalt = new byte[128 / 8];
-                    using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-                    {
-                        rng.GetNonZeroBytes(passwordSalt);
-                    }
-
-                    // 4. Create a passwordHash
-                    byte[] passwordHash = _authHelper.GetPasswordHash(registerUserDto.Password, passwordSalt);
-
-                    // 5. Store hashed key, salt and other user details in db
-                    User user = new()
-                    {
-                        UserName = registerUserDto.UserName,
-                        PasswordHash = Convert.ToBase64String(passwordHash),
-                        PasswordSalt = Convert.ToBase64String(passwordSalt),
-                        FirstName = registerUserDto.FirstName,
-                        LastName = registerUserDto.LastName,
-                        Gender = registerUserDto.Gender,
-                        Active = true
-                    };
-
-                    JsonSerializerSettings settings = new JsonSerializerSettings()
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
-                    };
-                    string userString = JsonConvert.SerializeObject(user, settings);
-
-                    using StreamWriter openFile = new("Users.txt", append: true);
-                    openFile.WriteLine(",\n" + userString);
-                    openFile.Close();
-
-                    return Ok("User created!");
-                }
-                else
-                {
-                    Console.WriteLine("User already exists!");
-                    return StatusCode(501, "User already exists!");
-                }
-            }
-            Console.WriteLine("Passwords do not match!");
-            return StatusCode(501, "Passwords do not match!");
+            return View();  // Ensure you have a corresponding "Login.cshtml" view
         }
 
-
-
+        // ✅ User Registration Endpoint
         [AllowAnonymous]
-        [HttpPost("Login")]
-        public IActionResult Login(LoginDto loginDto)
+        [HttpPost("RegisterUser")]
+        public IActionResult RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
-            //Get user details
-            User userDetails = null;
-            string usersJson = System.IO.File.ReadAllText("Users.txt");
-            if (usersJson != null)
+            if (registerUserDto.Password != registerUserDto.PasswordConfirm)
+            {
+                return StatusCode(400, "Passwords do not match!");
+            }
+
+            string usersFilePath = "Users.txt";
+            if (!System.IO.File.Exists(usersFilePath))
+            {
+                System.IO.File.WriteAllText(usersFilePath, "");  // Create empty file if missing
+            }
+
+            string usersJson = System.IO.File.ReadAllText(usersFilePath);
+            bool userFound = false;
+
+            if (!string.IsNullOrEmpty(usersJson))
             {
                 usersJson = "[" + usersJson + "]";
-                IEnumerable<User>? users = JsonConvert.DeserializeObject<IEnumerable<User>>(usersJson);
-                if (users != null)
-                {
-                    foreach (User user in users)
-                    {
-                        if (user.UserName == loginDto.UserName)
-                        {
-                            userDetails = new()
-                            {
-                                UserName = user.UserName,
-                                PasswordHash = user.PasswordHash,
-                                PasswordSalt = user.PasswordSalt
-                            };
-                        }
-                    }
-                }
+                var users = JsonConvert.DeserializeObject<List<User>>(usersJson) ?? new List<User>();
+                userFound = users.Any(u => u.UserName == registerUserDto.UserName);
             }
 
-            if (userDetails != null)
+            if (userFound)
             {
-                byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
-                byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
-                for (int index = 0; index < passwordHash.Length; index++)
-                {
-                    if (passwordHash[index] != userPasswordHash[index])
-                    {
-                        return StatusCode(501, "Incorrect password!");
-                    }
-                }
+                return StatusCode(409, "User already exists!");
+            }
 
-                return Ok(new Dictionary<string, string> {
-                    {"token", _authHelper.CreateJwtToken(userDetails.UserName)}
-                });
-            }
-            else
+            // ✅ Create password hash and salt
+            byte[] passwordSalt = new byte[128 / 8];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
-                return StatusCode(501, "Username not found!");
+                rng.GetNonZeroBytes(passwordSalt);
             }
+
+            byte[] passwordHash = _authHelper.GetPasswordHash(registerUserDto.Password, passwordSalt);
+
+            User newUser = new()
+            {
+                UserName = registerUserDto.UserName,
+                PasswordHash = Convert.ToBase64String(passwordHash),
+                PasswordSalt = Convert.ToBase64String(passwordSalt),
+                FirstName = registerUserDto.FirstName,
+                LastName = registerUserDto.LastName,
+                Gender = registerUserDto.Gender,
+                Active = true
+            };
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            string userString = JsonConvert.SerializeObject(newUser, settings);
+
+            using StreamWriter openFile = new(usersFilePath, append: true);
+            openFile.WriteLine(",\n" + userString);
+            openFile.Close();
+
+            return Ok("User created successfully!");
         }
 
+        // ✅ Login API (Authenticate User)
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] LoginDto loginDto)
+        {
+            string usersFilePath = "Users.txt";
+            if (!System.IO.File.Exists(usersFilePath))
+            {
+                return StatusCode(404, "No users found!");
+            }
 
-        /*[HttpGet("Logout")]
+            string usersJson = System.IO.File.ReadAllText(usersFilePath);
+            if (string.IsNullOrEmpty(usersJson))
+            {
+                return StatusCode(404, "No users found!");
+            }
+
+            usersJson = "[" + usersJson + "]";
+            var users = JsonConvert.DeserializeObject<List<User>>(usersJson);
+            if (users == null || !users.Any())
+            {
+                return StatusCode(404, "No users found!");
+            }
+
+            var userDetails = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
+
+            if (userDetails == null)
+            {
+                return StatusCode(404, "Username not found!");
+            }
+
+            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
+            byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
+
+            if (!passwordHash.SequenceEqual(userPasswordHash))
+            {
+                return StatusCode(401, "Incorrect password!");
+            }
+
+            string token = _authHelper.CreateJwtToken(userDetails.UserName);
+            return Ok(new { token });
+        }
+
+        // ✅ Logout API (Optional)
+        [HttpGet("Logout")]
         public IActionResult Logout()
         {
-            HttpContext.User.FindFirstValue("userId");
-            return Ok();
-        }*/
-
+            return Ok("User logged out successfully.");
+        }
     }
 }
