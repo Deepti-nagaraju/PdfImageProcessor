@@ -276,9 +276,9 @@ namespace PdfImageProcessor.Services
                 int sgstRateIndex = cgstRateIndex != -1 ? cgstAmountIndex +1 : -1;
                 int sgstAmountIndex = cgstRateIndex != -1 ? sgstRateIndex + 1 : -1;
                 int igstRateIndex = headers.FindIndex(h => h.Contains("igst"));
-                int igstAmountIndex = igstRateIndex + 1;
+                int igstAmountIndex = igstRateIndex != -1 ? igstRateIndex + 1 : -1;
                 int totalAmountIndex = -1;
-                if(igstAmountIndex >=1)
+                if (igstAmountIndex >=1)
                 {
                     totalAmountIndex = igstAmountIndex + 1;
                 }
