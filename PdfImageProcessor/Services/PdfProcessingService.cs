@@ -156,9 +156,9 @@ namespace PdfImageProcessor.Services
                         var sgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
                         var igstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
                         // ✅ If values are missing, fetch from secondary tax table
-                        if (taxableAmount == "0" && amount=="0"&& taxableValues.ContainsKey(hsnCode))
+                        if (taxableAmount == "0" && cgstPercent == "0" && sgstPercent == "0" && igstPercent == "0" && taxableValues.ContainsKey(hsnCode))
                         {
-                            (taxableAmount, cgstPercent, cgstFetch,sgstPercent, sgstFetch,igstPercent,igstFetch, amount) = taxableValues[hsnCode];
+                            (taxableAmount, cgstPercent, cgstFetch, sgstPercent, sgstFetch, igstPercent, igstFetch, amount) = taxableValues[hsnCode];
                         }
                         // ✅ Convert cleaned values to decimal for summing
                         decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
