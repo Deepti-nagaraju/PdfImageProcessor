@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static PdfImageProcessor.Controllers.PdfController;
 using System.Reflection.PortableExecutable;
+using Microsoft.IdentityModel.Tokens;
 
 namespace PdfImageProcessor.Services
 {
@@ -78,9 +79,15 @@ namespace PdfImageProcessor.Services
 
         //    return tables;
         //}
-        public static List<TableModel> StructureExtractedTables(AnalyzeResult result, out decimal totalAmount, out decimal totalRate,  out decimal totalQuantity,out decimal sgst, out decimal cgst, out decimal igst)
+        public static List<TableModel> StructureExtractedTables(
+     AnalyzeResult result,
+     out decimal totalAmount,
+     out decimal totalRate,
+     out decimal totalQuantity,
+     out decimal sgst,
+     out decimal cgst,
+     out decimal igst)
         {
-            //List<TableModel> extractedTables = result.Tables;
             var structuredTables = new List<TableModel>();
             totalAmount = 0;
             totalQuantity = 0;
@@ -89,20 +96,34 @@ namespace PdfImageProcessor.Services
             cgst = 0;
             igst = 0;
 
+            // ✅ Extract key-value pairs for additional tax values
+            var extractedKeyValues = result.KeyValuePairs
+                .Where(kvp => kvp.Key != null && kvp.Value != null)
+                .ToLookup(
+                    kvp => NormalizeKey(kvp.Key.Content),
+                    kvp => kvp.Value.Content.Trim(),
+                    StringComparer.OrdinalIgnoreCase
+                );
+
+            // ✅ Extract Taxable Values & Tax % from the secondary table
+            var taxableValues = ExtractTaxableAmounts(result);
+
             foreach (var table in result.Tables)
             {
                 var headers = table.Cells
                     .Where(c => c.RowIndex == 0)
                     .Select(c => c.Content)
                     .ToList();
+
                 var rows = table.Cells.Where(c => c.RowIndex > 0)
-                            .GroupBy(c => c.RowIndex)
-                            .Select(row => row.OrderBy(c => c.ColumnIndex).Select(c => c.Content).ToList());
-                if (headers.Any(header => RegexHelper.IsValidTableHeader(header))) { 
-                            
+                           .GroupBy(c => c.RowIndex)
+                           .Select(row => row.OrderBy(c => c.ColumnIndex).Select(c => c.Content).ToList());
+
+                if (headers.Any(header => RegexHelper.IsValidTableHeader(header)))
+                {
                     var structuredTable = new TableModel
                     {
-                        Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity","Taxable Value","SGST%", "CGST%", "IGST%","SGST", "CGST", "IGST", "Amount" },
+                        Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity", "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST", "Amount" },
                         Rows = new List<List<string>>()
                     };
 
@@ -112,20 +133,35 @@ namespace PdfImageProcessor.Services
                     {
                         var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Model", "Vessel" }, new List<string> { "" });
 
-                        // ✅ Check if the row should be ignored
                         if (!string.IsNullOrEmpty(description) && description.Trim().ToLower().Contains("total"))
                         {
                             continue; // ✅ Skip this row
                         }
+
+                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN", "Item Code", "SAC", "code" }, new List<string> { "" });
+
                         var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
                         var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
                         var amount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" }, new List<string> { "" }));
-                        var cgstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
-                        var sgstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
-                        var igstFetch = CleanNumericValue(GetColumnValueForGST(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
 
-                    // ✅ Convert cleaned values to decimal for summing
-                    decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
+                        // ✅ Fetch from primary table first, else use secondary table
+                        var taxableAmount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Taxable Value", "Taxable Amount" }, new List<string> { "" }));
+                        var cgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST", "Central GST" }, new List<string> { "%", "rate" }));
+                        var sgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "State GST" }, new List<string> { "%", "rate" }));
+                        var igstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
+
+                       
+
+                        var cgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%","rate" }));
+                        var sgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
+                        var igstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
+                        // ✅ If values are missing, fetch from secondary tax table
+                        if (taxableAmount == "0" && amount=="0"&& taxableValues.ContainsKey(hsnCode))
+                        {
+                            (taxableAmount, cgstPercent, cgstFetch,sgstPercent, sgstFetch,igstPercent,igstFetch, amount) = taxableValues[hsnCode];
+                        }
+                        // ✅ Convert cleaned values to decimal for summing
+                        decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
                         totalAmount += amountValue;
 
                         decimal rateValue = decimal.TryParse(ratePer, out decimal rate) ? rate : 0;
@@ -142,21 +178,21 @@ namespace PdfImageProcessor.Services
                         igst += igstValue;
 
                         var mappedRow = new List<string>
-                        {
-                            serialNumber.ToString(),  // Sl No
-                            GetColumnValue(row, headers, new List<string> { "Description","Item","Product","Model","Vessel" ,"particulars"},new List<string> { "" }),
-                            GetColumnValue(row, headers, new List<string> { "HSN","Item Code","SAC","code"},new List<string> { "" }),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" },new List<string> { "" })),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per","Price","MRP" },new List<string> { "" })),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "tax","value"},new List<string> { "" })),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate" })),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate" })),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"})),
-                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST","state" },new List<string> {"%","rate"})),
-                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST","central" },new List<string> {"%","rate"})),
-                            CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" },new List<string> {"%","rate"})),
-                            CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" },new List<string> { "" }))
-                        };
+                {
+                    serialNumber.ToString(),
+                    description,
+                    hsnCode,
+                    quantity,
+                    ratePer,
+                    taxableAmount, // ✅ Fetched first from primary table, then secondary
+                    cgstPercent,   // ✅ Fetched first from primary table, then secondary
+                    sgstPercent,   // ✅ Fetched first from primary table, then secondary
+                    igstPercent,   // ✅ Fetched first from primary table, then secondary
+                    cgstFetch,
+                    sgstFetch,
+                    igstFetch,
+                    amount
+                };
 
                         structuredTable.Rows.Add(mappedRow);
                         serialNumber++;
@@ -169,6 +205,34 @@ namespace PdfImageProcessor.Services
 
             return structuredTables;
         }
+
+
+
+        private static string GetTaxFromKeyValuePairs(ILookup<string, string> keyValuePairs, List<string> possibleKeys)
+        {
+            // Normalize input search keys
+            var normalizedKeys = possibleKeys.Select(k => NormalizeKey(k)).ToList();
+
+            // Find the best-matching key in KeyValuePairs
+            var matchedKey = keyValuePairs
+                .Select(pair => pair.Key) // Extract all stored keys
+                .FirstOrDefault(storedKey =>
+                    normalizedKeys.Any(searchKey => storedKey.Contains(searchKey, StringComparison.OrdinalIgnoreCase))
+                );
+
+            if (matchedKey != null)
+            {
+                return string.Join(", ", keyValuePairs[matchedKey]); // Return the corresponding value(s)
+            }
+
+            return ""; // Return empty if no match found
+        }
+
+        private static string NormalizeKey(string key)
+        {
+             return key.Trim().Replace("\n", " ").ToLowerInvariant(); // Remove newlines and trim spaces
+        }
+
 
         private static string GetColumnValue(List<string> row, List<string> headers, List<string> possibleHeadersPrimary, List<string> possibleHeadersSecondary)
         {
@@ -192,6 +256,76 @@ namespace PdfImageProcessor.Services
 
             return Regex.Replace(input, @"[^\d.]", ""); // Remove all non-numeric characters except the decimal point
         }
+
+        private static Dictionary<string, (string TaxableAmount, string CGSTRate, string CGSTAmount, string SGSTRate, string SGSTAmount, string IGSTRate, string IGSTAmount,string TotalAmount)> ExtractTaxableAmounts(AnalyzeResult result)
+        {
+            var taxableAmounts = new Dictionary<string, (string, string, string, string, string,string,string,string)>();
+
+            foreach (var table in result.Tables)
+            {
+                var headers = table.Cells
+                    .Where(c => c.RowIndex == 0)
+                    .Select(c => c.Content.ToLower().Trim()) // Normalize headers
+                    .ToList();
+
+                // ✅ Find column indexes for relevant fields
+                int hsnIndex = headers.FindIndex(h => h.Contains("hsn") || h.Contains("sac"));
+                int taxableIndex = headers.FindIndex(h => h.Contains("tax"));
+                int cgstRateIndex = headers.FindIndex(h => h.Contains("cgst"));
+                int cgstAmountIndex = cgstRateIndex!=-1?cgstRateIndex + 1:-1;
+                int sgstRateIndex = cgstRateIndex != -1 ? cgstAmountIndex +1 : -1;
+                int sgstAmountIndex = cgstRateIndex != -1 ? sgstRateIndex + 1 : -1;
+                int igstRateIndex = headers.FindIndex(h => h.Contains("igst"));
+                int igstAmountIndex = igstRateIndex + 1;
+                int totalAmountIndex = -1;
+                if(igstAmountIndex >=1)
+                {
+                    totalAmountIndex = igstAmountIndex + 1;
+                }
+                else if(sgstAmountIndex>=1)
+                {
+                    totalAmountIndex = igstAmountIndex + 1;
+                }
+
+                if (hsnIndex == -1 || taxableIndex == -1)
+                {
+                    continue; // ✅ Skip if required columns are missing
+                }
+
+                var rows = table.Cells.Where(c => c.RowIndex > 0)
+                            .GroupBy(c => c.RowIndex)
+                            .Select(row => row.OrderBy(c => c.ColumnIndex).Select(c => c.Content).ToList());
+
+                foreach (var row in rows)
+                {
+                    if (row.Count <= hsnIndex || row.Count <= taxableIndex || row.Count <= cgstRateIndex || row.Count <= sgstRateIndex)
+                    {
+                        continue; // ✅ Skip incomplete rows
+                    }
+
+                    string hsnCode = row[hsnIndex].Trim();
+                    string taxableAmount = row[taxableIndex].Trim();
+                    string cgstRate = cgstRateIndex != -1 && row.Count > cgstRateIndex ? row[cgstRateIndex].Trim() : "N/A";
+                    string cgstAmount = cgstAmountIndex != -1 && row.Count > cgstAmountIndex ? row[cgstAmountIndex].Trim() : "N/A";
+                    string sgstRate = sgstRateIndex != -1 && row.Count > sgstRateIndex ? row[sgstRateIndex].Trim() : "N/A";
+                    string sgstAmount = sgstAmountIndex != -1 && row.Count > sgstAmountIndex ? row[sgstAmountIndex].Trim() : "N/A";
+                    string igstRate = igstRateIndex != -1 && row.Count > igstRateIndex ? row[igstRateIndex].Trim() : "N/A";
+                    string igstAmount = igstAmountIndex != -1 && row.Count > igstAmountIndex ? row[igstAmountIndex].Trim() : "N/A";
+                    string totalAmount = totalAmountIndex!=-1 && row.Count > totalAmountIndex ? row[totalAmountIndex].Trim() : "N/A";
+
+                    // ✅ Store the extracted values only if HSN code is present
+                    if (!string.IsNullOrEmpty(hsnCode) && hsnCode.ToLower()!="total")
+                    {
+                        taxableAmounts[hsnCode] = (taxableAmount, cgstRate, cgstAmount, sgstRate, sgstAmount, igstRate, igstAmount, totalAmount);
+                    }
+                }
+            }
+            return taxableAmounts;
+        }
+
+
+
+
 
 
 

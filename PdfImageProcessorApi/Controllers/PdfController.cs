@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 
 namespace PdfImageProcessor.Controllers
 {
+    [EnableCors("AllowAllOrigins")]
     [ApiController]
     [Route("api/pdf")]
     public class PdfController : ControllerBase
