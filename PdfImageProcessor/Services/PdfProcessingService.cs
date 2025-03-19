@@ -131,14 +131,14 @@ namespace PdfImageProcessor.Services
 
                     foreach (var row in rows)
                     {
-                        var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Model", "Vessel" }, new List<string> { "" });
+                        var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Particulars","Model", "Vessel" }, new List<string> { "" });
 
                         if (!string.IsNullOrEmpty(description) && description.Trim().ToLower().Contains("total"))
                         {
                             continue; // ✅ Skip this row
                         }
 
-                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN", "Item Code", "SAC", "code" }, new List<string> { "" });
+                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN",  "SAC",  }, new List<string> { "" });
 
                         var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
                         var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
