@@ -17,8 +17,8 @@ namespace PdfImageProcessor.Services
 {
     public class PdfProcessingService
     {
-        private const string Endpoint = "https://vrtekh-doc-int.cognitiveservices.azure.com/";
-        private const string ApiKey = "GIsd8NQSsh9VKgyDHRR457U1dFCrP1v4WPxWVplu6SwP4hURjbwdJQQJ99BCACGhslBXJ3w3AAALACOGJ8Ad";
+        private const string Endpoint = "https://deepti.cognitiveservices.azure.com/";
+        private const string ApiKey = "3lUsGeSbyFujvN5DM45mYggERcTBcob26fhxqwSSXixhWi1PMwkhJQQJ99BBACGhslBXJ3w3AAALACOGVVET";
 
         private readonly DocumentAnalysisClient _client;
 
@@ -275,7 +275,7 @@ namespace PdfImageProcessor.Services
                 int cgstAmountIndex = cgstRateIndex!=-1?cgstRateIndex + 1:-1;
                 int sgstRateIndex = cgstRateIndex != -1 ? cgstAmountIndex +1 : -1;
                 int sgstAmountIndex = cgstRateIndex != -1 ? sgstRateIndex + 1 : -1;
-                int igstRateIndex = headers.FindIndex(h => h.Contains("igst"));
+                int igstRateIndex = headers.FindIndex(h => h.Contains("igst")||h.Contains("integrated tax"));
                 int igstAmountIndex = igstRateIndex != -1 ? igstRateIndex + 1 : -1;
                 int totalAmountIndex = -1;
                 if (igstAmountIndex >=1)
@@ -497,7 +497,10 @@ namespace PdfImageProcessor.Services
                     extractedData.Quantity.Add(totalQuantity.ToString());
                     extractedData.Cgst.Add(cgst.ToString());
                     extractedData.Sgst.Add(sgst.ToString());
-                    extractedData.Igst.Add(igst.ToString());
+                    if (igst != 0)
+                    {
+                        extractedData.Igst.Add(igst.ToString());
+                    }
 
 
                     if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("account no")||key.Contains("rtgs/ifcs code"))extractedData.IfscCode.Add(value);
@@ -528,6 +531,11 @@ namespace PdfImageProcessor.Services
                         {
                             extractedData.ShipToContactNumber.Add(value);
                         }
+
+                    if (extractedData.Igst.Count == 0 && (key.Contains("integrated tax")|| key.Contains("igst")))
+                    {
+                        extractedData.Igst.Add(value);
+                    }
                     
 
                 }
