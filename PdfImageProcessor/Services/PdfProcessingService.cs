@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using static PdfImageProcessor.Controllers.PdfController;
 using System.Reflection.PortableExecutable;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection.Metadata;
 
 namespace PdfImageProcessor.Services
 {
@@ -19,6 +20,7 @@ namespace PdfImageProcessor.Services
     {
         private const string Endpoint = "https://deepti.cognitiveservices.azure.com/";
         private const string ApiKey = "3lUsGeSbyFujvN5DM45mYggERcTBcob26fhxqwSSXixhWi1PMwkhJQQJ99BBACGhslBXJ3w3AAALACOGVVET";
+        private static readonly string modelId = "Prebuilt_Invoice_3";
 
         private readonly DocumentAnalysisClient _client;
 
@@ -35,14 +37,19 @@ namespace PdfImageProcessor.Services
             {
                 var extractedData = new MainTableModel { FileName = file.FileName };
                 using var stream = file.OpenReadStream();
-                var operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-document", stream);
+                var operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
                 var result = operation.Value;
 
                 decimal totalAmount = 0;
                 decimal totalTax = 0;
                 decimal totalQuantity = 0;
                 decimal totalRate = 0;
+               
                 extractedData.ExtractedTables = StructureExtractedTables(result,out totalAmount,out totalRate,out totalQuantity,out decimal cgst,out decimal sgst,out decimal igst);
+                if (extractedData.ExtractedTables.Count == 0)
+                {
+                    extractedData.ExtractedTables = StructureExtractedTables(result);
+                }
                 ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
 
                 extractedDataList.Add(extractedData);
@@ -80,13 +87,13 @@ namespace PdfImageProcessor.Services
         //    return tables;
         //}
         public static List<TableModel> StructureExtractedTables(
-     AnalyzeResult result,
-     out decimal totalAmount,
-     out decimal totalRate,
-     out decimal totalQuantity,
-     out decimal sgst,
-     out decimal cgst,
-     out decimal igst)
+      AnalyzeResult result,
+      out decimal totalAmount,
+      out decimal totalRate,
+      out decimal totalQuantity,
+      out decimal sgst,
+      out decimal cgst,
+      out decimal igst)
         {
             var structuredTables = new List<TableModel>();
             totalAmount = 0;
@@ -131,14 +138,14 @@ namespace PdfImageProcessor.Services
 
                     foreach (var row in rows)
                     {
-                        var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Particulars","Model", "Vessel" }, new List<string> { "" });
+                        var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Particulars", "Model", "Vessel" }, new List<string> { "" });
 
                         if (!string.IsNullOrEmpty(description) && description.Trim().ToLower().Contains("total"))
                         {
                             continue; // ✅ Skip this row
                         }
 
-                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN",  "SAC",  }, new List<string> { "" });
+                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN", "SAC", }, new List<string> { "" });
 
                         var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
                         var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
@@ -150,9 +157,9 @@ namespace PdfImageProcessor.Services
                         var sgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "State GST" }, new List<string> { "%", "rate" }));
                         var igstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
 
-                       
 
-                        var cgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%","rate" }));
+
+                        var cgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
                         var sgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
                         var igstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
                         // ✅ If values are missing, fetch from secondary tax table
@@ -205,6 +212,77 @@ namespace PdfImageProcessor.Services
 
             return structuredTables;
         }
+
+
+        public static List<TableModel> StructureExtractedTables(AnalyzeResult result)
+        {
+            var structuredTables = new List<TableModel>();
+
+            // Check if 'Items' field exists and is a list
+            if (result.Documents.FirstOrDefault()?.Fields.TryGetValue("Items", out var itemsField) == true &&
+                itemsField.FieldType == DocumentFieldType.List)
+            {
+                var items = itemsField.Value.AsList();
+                var table = new TableModel
+                {
+                    Headers = new List<string>
+            {
+                "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity",
+                "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST", "Amount"
+            },
+                    Rows = new List<List<string>>()
+                };
+
+                int serialNumber = 1;
+
+                foreach (var item in items)
+                {
+                    if (item.FieldType != DocumentFieldType.Dictionary) continue;
+
+                    var fields = item.Value.AsDictionary();
+
+                    string description = fields.TryGetValue("Description", out var desc) ? desc?.Content?.Trim() ?? "" : "";
+                    string hsnCode = fields.TryGetValue("ProductCode", out var productCode) ? productCode?.Content?.Trim() ?? "" : "";
+                    string quantity = fields.TryGetValue("Quantity", out var qty) ? qty?.Content?.Trim() ?? "" : "";
+                    string unitPrice = fields.TryGetValue("UnitPrice", out var price) ? price?.Content?.Trim() ?? "" : "";
+                    string amount = fields.TryGetValue("Amount", out var amt) ? amt?.Content?.Trim() ?? "" : "";
+                    string taxValue = fields.TryGetValue("Tax", out var tax) ? tax?.Content?.Trim() ?? "" : "";
+                    string sgstPercent = fields.TryGetValue("SGST%", out var sgstPer) ? sgstPer?.Content?.Trim() ?? "" : "";
+                    string cgstPercent = fields.TryGetValue("CGST%", out var cgstPer) ? cgstPer?.Content?.Trim() ?? "" : "";
+                    string igstPercent = fields.TryGetValue("IGST%", out var igstPer) ? igstPer?.Content?.Trim() ?? "" : "";
+                    string sgstValue = fields.TryGetValue("SGST", out var sgstVal) ? sgstVal?.Content?.Trim() ?? "" : "";
+                    string cgstValue = fields.TryGetValue("CGST", out var cgstVal) ? cgstVal?.Content?.Trim() ?? "" : "";
+                    string igstValue = fields.TryGetValue("IGST", out var igstVal) ? igstVal?.Content?.Trim() ?? "" : "";
+
+                    var row = new List<string>
+            {
+                serialNumber.ToString(),
+                description,
+                hsnCode,
+                quantity,
+                unitPrice,
+                taxValue,
+                sgstPercent,
+                cgstPercent,
+                igstPercent,
+                sgstValue,
+                cgstValue,
+                igstValue,
+                amount
+            };
+
+                    table.Rows.Add(row);
+                    serialNumber++;
+
+                    Console.WriteLine($"✔ Row {serialNumber - 1}: {description}, Qty: {quantity}, Rate: {unitPrice}, Amount: {amount}");
+                }
+
+                structuredTables.Add(table);
+            }
+
+            return structuredTables;
+        }
+
 
 
 
@@ -331,183 +409,43 @@ namespace PdfImageProcessor.Services
 
         private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData,decimal totalAmount, decimal totalRate,decimal totalQuantity, decimal cgst, decimal sgst, decimal igst)
         {
-            
-            foreach (var field in result.KeyValuePairs)
+            foreach (var field in result.Documents[0].Fields)
             {
-                var key = field.Key?.Content?.Trim().ToLower() ?? "";
+                var key = field.Key?.Trim().ToLower() ?? "";
                 var value = field.Value?.Content?.Trim() ?? "";
                 var valueToCheck = field.Value?.Content?.Trim().ToLower() ?? "";
 
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (key.Contains("irn")) extractedData.Irn.Add(value);
-                    if (key.Contains("ack") && ((key.Contains("no") || key.Contains("number")))) extractedData.AcknowledgeNumber.Add(value);
-                    if (key.Contains("ack") && ((key.Contains("date") || key.Contains("dt")))) extractedData.AcknowledgeDate.Add(value);
-
-                    if (key.Contains("buyer") || key.Contains("consigners name") || key.Contains("dell at") || key.Contains("bill to") || key.Contains("customer") || key.Contains("address") || key.Contains("billed to") || key.Contains("consignor"))
-                    {
-                        string remainingText = value.Trim();
-                        var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
-                        if (companyMatch.Success)
-                        {
-                            extractedData.Buyer.Add(companyMatch.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(companyMatch.Value, "").Trim(); // Remove extracted company name
-                        }
-                        var gstin = RegexHelper.GstinRegex.Match(value);
-                        if (gstin.Success)
-                        {
-                            extractedData.BuyerGstin.Add(gstin.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(gstin.Value, "").Trim(); // Remove extracted GSTIN
-                        }
-                        var email = RegexHelper.EmailRegex.Match(value);
-                        if (email.Success)
-                        {
-                            extractedData.BuyerEmail.Add(email.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(email.Value, "").Trim(); // Remove extracted Contact Number
-                        }
-                        var contactNumber = RegexHelper.MobileNumberRegex.Match(value);
-                        if (contactNumber.Success)
-                        {
-                            extractedData.BuyerContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
-                        }
-
-                        var pinCode = RegexHelper.PinCodeRegex.Match(value);
-                        if (pinCode.Success)
-                        {
-                            extractedData.BuyerPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
-                        }
-                        if (!string.IsNullOrEmpty(remainingText))
-                        {
-                            extractedData.BuyerAddressLine1.Add(remainingText);
-                        }
-                    }
-
-
-                    if (key.Contains("gst"))
-                    {
-                        extractedData.BuyerGstin.Add(value.Trim());
-                    }
-
-                    //if ((key.Contains("seller")) && RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("name") || key.Contains("address")|| key.Contains("deli")|| key.Contains("consignee") || key.Contains("invoice to") || key.Contains("delivery") || key.Contains("shipper"))
-                    //{
-                    //    string remainingText = value.Trim();
-                    //    var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
-                    //    if (companyMatch.Success)
-                    //    {
-                    //        extractedData.Seller.Add(companyMatch.Value.Trim()); // ✅ Add only the matched company name
-                    //        remainingText = remainingText.Replace(companyMatch.Value, "").Trim(); // Remove extracted company name
-                    //    }
-                    //    var gstin = RegexHelper.GstinRegex.Match(value);
-                    //    if (gstin.Success)
-                    //    {
-                    //        extractedData.SellerGstin.Add(gstin.Value.Trim()); // ✅ Add only the matched company name
-                    //        remainingText = remainingText.Replace(gstin.Value, "").Trim(); // Remove extracted GSTIN
-                    //    }
-                    //    var email = RegexHelper.EmailRegex.Match(value);
-                    //    if (email.Success)
-                    //    {
-                    //        extractedData.SellerEmail.Add(email.Value.Trim()); // ✅ Add only the matched company name
-                    //        remainingText = remainingText.Replace(email.Value, "").Trim(); // Remove extracted Contact Number
-                    //    }
-                    //    var contactNumber = RegexHelper.MobileNumberRegex.Match(value);
-                    //    if (contactNumber.Success)
-                    //    {
-                    //        extractedData.SellerContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
-                    //        remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
-                    //    }
-                    //    var pinCode = RegexHelper.PinCodeRegex.Match(value);
-                    //    if (pinCode.Success)
-                    //    {
-                    //        extractedData.SellerPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
-                    //        remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
-                    //    }
-                    //    if (!string.IsNullOrEmpty(remainingText))
-                    //    {
-                    //        extractedData.SellerAddressLine1.Add(remainingText);
-                    //    }
-                    //}
-                    //if (key.Contains("gst") && extractedData.BuyerGstin.Count == 0)
-                    //{
-                    //    extractedData.SellerGstin.Add(value.Trim());
-                    //}
-                    if ((key.Contains("ship")) || RegexHelper.CompanyNameRegex.IsMatch(value) || key.Contains("consignee") || key.Contains("shipped to") || key.Contains("address") || key.Contains("ultimate consignee"))
-                    {
-                        string remainingText = value.Trim();
-                        var companyMatch = RegexHelper.CompanyNameRegex.Match(value);
-                        if (companyMatch.Success)
-                        {
-                            extractedData.ShipTo.Add(companyMatch.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(companyMatch.Value, "").Trim(); // Remove extracted company name
-                        }
-
-                        var email = RegexHelper.EmailRegex.Match(value);
-                        if (email.Success)
-                        {
-                            extractedData.ShipToEmail.Add(email.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(email.Value, "").Trim(); // Remove extracted Contact Number
-                        }
-                        var contactNumber = RegexHelper.MobileNumberRegex.Match(value);
-                        if (contactNumber.Success)
-                        {
-                            extractedData.ShipToContactNumber.Add(contactNumber.Value.Trim()); // ✅ Add only the matched company name
-                            remainingText = remainingText.Replace(contactNumber.Value, "").Trim(); // Remove extracted Email
-                        }
-                        //var pinCode = RegexHelper.PinCodeRegex.Match(value);
-                        //if (pinCode.Success)
-                        //{
-                        //    extractedData.ShipToPinCode.Add(pinCode.Value.Trim()); // ✅ Add only the matched company name
-                        //    remainingText = remainingText.Replace(pinCode.Value, "").Trim(); // Remove extracted Email
-                        //}
-                        if (!string.IsNullOrEmpty(remainingText))
-                        {
-                            extractedData.ShipToAddressLine1.Add(remainingText);
-                        }
-                    }
-
-
-                    if (key.Contains("invoice number") ||key.Contains("invoice")||key.Contains("pi no") || key.Contains("bill no") || key.Contains("inv.no") || key.Contains("inovice no\n:") || key.Contains("document no") || key.Contains("invoice serial number") || key.Contains("proforma no ") || key.Contains("invoice #") || key.Contains("invoice no") || key.Contains("order no") || key.Contains("pl no")) extractedData.InvoiceNumber.Add(value);
-                    if (key.Contains("date") || key.Contains("invoice no & date")) extractedData.InvoiceDate.Add(value);
+                    if (key=="acknowledgementnumber") extractedData.AcknowledgeNumber.Add(value);
+                    if (key== "acknowledgementdate") extractedData.AcknowledgeDate.Add(value);
+                    if(key== "billingaddressrecipient")extractedData.Buyer.Add(value);
+                    if(key == "billingaddress") extractedData.BuyerAddressLine1.Add(value);
+                    if(key=="") 
+                    if (key=="customertaxid")extractedData.BuyerGstin.Add(value.Trim());  
+                    if (key== "invoiceid") extractedData.InvoiceNumber.Add(value);
+                    if (key== "invoicedate") extractedData.InvoiceDate.Add(value);
+                    if (key == "shippingaddressrecipient") extractedData.ShipTo.Add(value);
+                    if(key == "shippingaddressrecipient") extractedData.ShipToAddressLine1.Add(value);
                     if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
                     if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
                     if ((key.Contains("despatch") || key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
-                    if (key.Contains("through") | (key.Contains(":\n"))|(key.Contains("transport name")) | (key.Contains("transport"))) extractedData.DespatchThrough.Add(value);
-                    if (key.Contains("vehicle no") || key.Contains("vehical no")||key.Contains("vehicle number")) extractedData.VehicleNo.Add(value);
+                    if (key== "transportmode") extractedData.DespatchThrough.Add(value);
+                    if (key == "vehiclenumber" ) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
                     if (key.Contains("state") || key.Contains("slate name") ||key.Contains("place")) extractedData.BuyerState.Add(value);
-                    if (key.Contains("contact person")||(key.Contains("contact")))  extractedData.BuyerContactPerson.Add(value);
-                    if (key.Contains("contact person") || (key.Contains("attn"))||(key.Contains("contact"))) extractedData.ShipToContactPerson.Add(value);
-                    if (key.Contains("survey no")) extractedData.BuyerAddressLine1.Add(value);
-                    if (key.Contains("survey no")) extractedData.ShipToAddressLine1.Add(value);
-
-
-                    //if (key.Contains("description of goods")) extractedData.DescriptionOfGoods.Add(value);
-                    //if (key.Contains("hsn")) extractedData.HsnCode.Add(value);
-                    //if (key.Contains("qty") || key.Contains("quantity")) extractedData.Quantity.Add(value);
-                    //if (key.Contains("rate")) extractedData.Rate.Add(value);
-                    //if (key.Contains("cgst")) extractedData.Cgst.Add(value);
-                    //if (key.Contains("sgst")) extractedData.Sgst.Add(value);
-                    //if (key.Contains("igst")) extractedData.Igst.Add(value);
-                    //if (key.Contains("total amount") || key.Contains("total amt")) extractedData.TotalAmount.Add(value);
-                    //if (key.Contains("charg")) extractedData.TotalAmount.Add(value);
-                    //if (key.Contains("declaration")) extractedData.Declaration.Add(value);
-                    extractedData.Rate.Add(totalRate.ToString());
-                    extractedData.TotalAmount.Add(totalAmount.ToString());
-                    extractedData.Quantity.Add(totalQuantity.ToString());
-                    extractedData.Cgst.Add(cgst.ToString());
-                    extractedData.Sgst.Add(sgst.ToString());
-                    if (igst != 0)
-                    {
-                        extractedData.Igst.Add(igst.ToString());
-                    }
-
-
-                    if (key.Contains("ifs")|| key.Contains("ifsc code")|| key.Contains("account no")||key.Contains("rtgs/ifcs code"))extractedData.IfscCode.Add(value);
-                    if (key.Contains("bank")|| key.Contains("bank details") ||key.Contains("bank name")|| valueToCheck.Contains("bank"))  
-                        extractedData.BankName.Add(value);
-                    if (key.Contains("account number") || key.Contains("acct no")|| key.Contains("account no")|| key.Contains("a/c no")||  key.Contains("bank")||key.Contains("a/c")|| key.Contains("acct number") || key.Contains("account no") || key.Contains("account")) extractedData.AcctNo.Add(value);
-                    if (key.Contains("eway")|| key.Contains("e way bill no") || key.Contains("bill no")||key.Contains("ewb no")||key.Contains("ebill")|| key.Contains("e-way") || key.Contains("e-bill") || key.Contains("e way") || key.Contains("e bill")) extractedData.EWayBill.Add(value);
+                    if (key=="billtocontactperson")  extractedData.BuyerContactPerson.Add(value);
+                    if (key== "shiptocontactperson") extractedData.ShipToContactPerson.Add(value);
+                    if (key == "cgst") extractedData.Cgst.Add(value);
+                    if (key == "sgst") extractedData.Sgst.Add(value);
+                    if (key == "igst") extractedData.Igst.Add(value);
+                    if (key == "invoicetotal") extractedData.TotalAmount.Add(value);
+                    if (key == "ewaybillnumber") extractedData.EWayBill.Add(value);
+                    if (key== "ifsccode") extractedData.IfscCode.Add(value);
+                    if (key=="bankname") extractedData.BankName.Add(value);
+                    if (key == "accountnumber") extractedData.AcctNo.Add(value);
+                    
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
