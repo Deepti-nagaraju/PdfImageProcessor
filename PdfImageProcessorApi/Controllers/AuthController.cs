@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -10,6 +11,7 @@ using PdfImageProcessor.Models;
 
 namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
 {
+    [EnableCors("AllowAllOrigins")]
     [Authorize]
     [ApiController]
     [Route("api/auth")] // ✅ Now under api route
@@ -30,8 +32,10 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
             {
                 return BadRequest("Passwords do not match!");
             }
-
-            string usersFilePath = "Users.txt";
+            string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
+            Directory.CreateDirectory(dataDirectory);
+            string usersFilePath = Path.Combine(dataDirectory, "Users.txt");
+            //string usersFilePath = "Users.txt";
             if (!System.IO.File.Exists(usersFilePath))
             {
                 System.IO.File.WriteAllText(usersFilePath, "");
@@ -89,7 +93,10 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
         [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
-            string usersFilePath = "Users.txt";
+            string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
+            Directory.CreateDirectory(dataDirectory);
+            string usersFilePath = Path.Combine(dataDirectory, "Users.txt");
+            //string usersFilePath = "Users.txt";
             if (!System.IO.File.Exists(usersFilePath))
             {
                 return NotFound("No users found!");
