@@ -7,10 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PdfImageProcessor.Controllers
 {
-    [EnableCors("AllowAllOrigins")]
+     [EnableCors("AllowAllOrigins")]
     [ApiController]
     [Route("api/pdf")]
     public class PdfController : ControllerBase

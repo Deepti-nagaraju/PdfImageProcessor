@@ -46,10 +46,11 @@ namespace PdfImageProcessor.Services
                 decimal totalRate = 0;
                
                 extractedData.ExtractedTables = StructureExtractedTables(result,out totalAmount,out totalRate,out totalQuantity,out decimal cgst,out decimal sgst,out decimal igst);
-                if (extractedData.ExtractedTables.Count == 0)
-                {
-                    extractedData.ExtractedTables = StructureExtractedTables(result);
-                }
+                //if (extractedData.ExtractedTables.Count == 0)
+                //{
+                   // extractedData.ExtractedTables = StructureExtractedTables(result);
+                //}
+                //ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
                 ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
 
                 extractedDataList.Add(extractedData);
@@ -86,9 +87,135 @@ namespace PdfImageProcessor.Services
 
         //    return tables;
         //}
-        public static List<TableModel> StructureExtractedTables(
-      AnalyzeResult result,
-      out decimal totalAmount,
+      //  public static List<TableModel> StructureExtractedTables(
+      //AnalyzeResult result,
+      //out decimal totalAmount,
+      //out decimal totalRate,
+      //out decimal totalQuantity,
+      //out decimal sgst,
+      //out decimal cgst,
+      //out decimal igst)
+      //  {
+      //      var structuredTables = new List<TableModel>();
+      //      totalAmount = 0;
+      //      totalQuantity = 0;
+      //      totalRate = 0;
+      //      sgst = 0;
+      //      cgst = 0;
+      //      igst = 0;
+
+      //      // ✅ Extract key-value pairs for additional tax values
+      //      var extractedKeyValues = result.KeyValuePairs
+      //          .Where(kvp => kvp.Key != null && kvp.Value != null)
+      //          .ToLookup(
+      //              kvp => NormalizeKey(kvp.Key.Content),
+      //              kvp => kvp.Value.Content.Trim(),
+      //              StringComparer.OrdinalIgnoreCase
+      //          );
+
+      //      // ✅ Extract Taxable Values & Tax % from the secondary table
+      //      var taxableValues = ExtractTaxableAmounts(result);
+
+      //      foreach (var table in result.Tables)
+      //      {
+      //          var headers = table.Cells
+      //              .Where(c => c.RowIndex == 0)
+      //              .Select(c => c.Content)
+      //              .ToList();
+
+      //          var rows = table.Cells.Where(c => c.RowIndex > 0)
+      //                     .GroupBy(c => c.RowIndex)
+      //                     .Select(row => row.OrderBy(c => c.ColumnIndex).Select(c => c.Content).ToList());
+
+      //          if (headers.Any(header => RegexHelper.IsValidTableHeader(header)))
+      //          {
+      //              var structuredTable = new TableModel
+      //              {
+      //                  Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity", "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST", "Amount" },
+      //                  Rows = new List<List<string>>()
+      //              };
+
+      //              int serialNumber = 1;
+
+      //              foreach (var row in rows)
+      //              {
+      //                  var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Particulars", "Model", "Vessel" }, new List<string> { "" });
+
+      //                  if (!string.IsNullOrEmpty(description) && description.Trim().ToLower().Contains("total"))
+      //                  {
+      //                      continue; // ✅ Skip this row
+      //                  }
+
+      //                  var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN", "SAC", }, new List<string> { "" });
+
+      //                  var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
+      //                  var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
+      //                  var amount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" }, new List<string> { "" }));
+
+      //                  // ✅ Fetch from primary table first, else use secondary table
+      //                  var taxableAmount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Taxable Value", "Taxable Amount" }, new List<string> { "" }));
+      //                  var cgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST", "Central GST" }, new List<string> { "%", "rate" }));
+      //                  var sgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "State GST" }, new List<string> { "%", "rate" }));
+      //                  var igstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
+
+
+
+      //                  var cgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
+      //                  var sgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
+      //                  var igstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
+      //                  // ✅ If values are missing, fetch from secondary tax table
+      //                  if (taxableAmount == "0" && cgstPercent == "0" && sgstPercent == "0" && igstPercent == "0" && taxableValues.ContainsKey(hsnCode))
+      //                  {
+      //                      (taxableAmount, cgstPercent, cgstFetch, sgstPercent, sgstFetch, igstPercent, igstFetch, amount) = taxableValues[hsnCode];
+      //                  }
+      //                  // ✅ Convert cleaned values to decimal for summing
+      //                  decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
+      //                  totalAmount += amountValue;
+
+      //                  decimal rateValue = decimal.TryParse(ratePer, out decimal rate) ? rate : 0;
+      //                  totalRate += rateValue;
+
+      //                  decimal qtyValue = decimal.TryParse(quantity, out decimal qty) ? qty : 0;
+      //                  totalQuantity += qtyValue;
+
+      //                  decimal cgstValue = decimal.TryParse(cgstFetch, out decimal cgstOut) ? cgstOut : 0;
+      //                  cgst += cgstValue;
+      //                  decimal sgstValue = decimal.TryParse(sgstFetch, out decimal sgstOut) ? sgstOut : 0;
+      //                  sgst += sgstValue;
+      //                  decimal igstValue = decimal.TryParse(igstFetch, out decimal igstOut) ? igstOut : 0;
+      //                  igst += igstValue;
+
+      //                  var mappedRow = new List<string>
+      //          {
+      //              serialNumber.ToString(),
+      //              description,
+      //              hsnCode,
+      //              quantity,
+      //              ratePer,
+      //              taxableAmount, // ✅ Fetched first from primary table, then secondary
+      //              cgstPercent,   // ✅ Fetched first from primary table, then secondary
+      //              sgstPercent,   // ✅ Fetched first from primary table, then secondary
+      //              igstPercent,   // ✅ Fetched first from primary table, then secondary
+      //              cgstFetch,
+      //              sgstFetch,
+      //              igstFetch,
+      //              amount
+      //          };
+
+      //                  structuredTable.Rows.Add(mappedRow);
+      //                  serialNumber++;
+      //              }
+
+      //              structuredTables.Add(structuredTable);
+      //              break;
+      //          }
+      //      }
+
+      //      return structuredTables;
+      //  }
+
+
+        public static List<TableModel> StructureExtractedTables(AnalyzeResult result, out decimal totalAmount,
       out decimal totalRate,
       out decimal totalQuantity,
       out decimal sgst,
@@ -103,120 +230,6 @@ namespace PdfImageProcessor.Services
             cgst = 0;
             igst = 0;
 
-            // ✅ Extract key-value pairs for additional tax values
-            var extractedKeyValues = result.KeyValuePairs
-                .Where(kvp => kvp.Key != null && kvp.Value != null)
-                .ToLookup(
-                    kvp => NormalizeKey(kvp.Key.Content),
-                    kvp => kvp.Value.Content.Trim(),
-                    StringComparer.OrdinalIgnoreCase
-                );
-
-            // ✅ Extract Taxable Values & Tax % from the secondary table
-            var taxableValues = ExtractTaxableAmounts(result);
-
-            foreach (var table in result.Tables)
-            {
-                var headers = table.Cells
-                    .Where(c => c.RowIndex == 0)
-                    .Select(c => c.Content)
-                    .ToList();
-
-                var rows = table.Cells.Where(c => c.RowIndex > 0)
-                           .GroupBy(c => c.RowIndex)
-                           .Select(row => row.OrderBy(c => c.ColumnIndex).Select(c => c.Content).ToList());
-
-                if (headers.Any(header => RegexHelper.IsValidTableHeader(header)))
-                {
-                    var structuredTable = new TableModel
-                    {
-                        Headers = new List<string> { "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity", "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST", "Amount" },
-                        Rows = new List<List<string>>()
-                    };
-
-                    int serialNumber = 1;
-
-                    foreach (var row in rows)
-                    {
-                        var description = GetColumnValue(row, headers, new List<string> { "Description", "Item", "Product", "Particulars", "Model", "Vessel" }, new List<string> { "" });
-
-                        if (!string.IsNullOrEmpty(description) && description.Trim().ToLower().Contains("total"))
-                        {
-                            continue; // ✅ Skip this row
-                        }
-
-                        var hsnCode = GetColumnValue(row, headers, new List<string> { "HSN", "SAC", }, new List<string> { "" });
-
-                        var quantity = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Quantity", "Qty" }, new List<string> { "" }));
-                        var ratePer = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Rate", "Rate Per", "Price", "MRP" }, new List<string> { "" }));
-                        var amount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Amount", "Amt" }, new List<string> { "" }));
-
-                        // ✅ Fetch from primary table first, else use secondary table
-                        var taxableAmount = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "Taxable Value", "Taxable Amount" }, new List<string> { "" }));
-                        var cgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "CGST", "Central GST" }, new List<string> { "%", "rate" }));
-                        var sgstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "SGST", "State GST" }, new List<string> { "%", "rate" }));
-                        var igstPercent = CleanNumericValue(GetColumnValue(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
-
-
-
-                        var cgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "CGST", "central" }, new List<string> { "%", "rate" }));
-                        var sgstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "SGST", "state" }, new List<string> { "%", "rate" }));
-                        var igstFetch = CleanNumericValue(GetColumnValueForTaxAmount(row, headers, new List<string> { "IGST" }, new List<string> { "%", "rate" }));
-                        // ✅ If values are missing, fetch from secondary tax table
-                        if (taxableAmount == "0" && cgstPercent == "0" && sgstPercent == "0" && igstPercent == "0" && taxableValues.ContainsKey(hsnCode))
-                        {
-                            (taxableAmount, cgstPercent, cgstFetch, sgstPercent, sgstFetch, igstPercent, igstFetch, amount) = taxableValues[hsnCode];
-                        }
-                        // ✅ Convert cleaned values to decimal for summing
-                        decimal amountValue = decimal.TryParse(amount, out decimal amt) ? amt : 0;
-                        totalAmount += amountValue;
-
-                        decimal rateValue = decimal.TryParse(ratePer, out decimal rate) ? rate : 0;
-                        totalRate += rateValue;
-
-                        decimal qtyValue = decimal.TryParse(quantity, out decimal qty) ? qty : 0;
-                        totalQuantity += qtyValue;
-
-                        decimal cgstValue = decimal.TryParse(cgstFetch, out decimal cgstOut) ? cgstOut : 0;
-                        cgst += cgstValue;
-                        decimal sgstValue = decimal.TryParse(sgstFetch, out decimal sgstOut) ? sgstOut : 0;
-                        sgst += sgstValue;
-                        decimal igstValue = decimal.TryParse(igstFetch, out decimal igstOut) ? igstOut : 0;
-                        igst += igstValue;
-
-                        var mappedRow = new List<string>
-                {
-                    serialNumber.ToString(),
-                    description,
-                    hsnCode,
-                    quantity,
-                    ratePer,
-                    taxableAmount, // ✅ Fetched first from primary table, then secondary
-                    cgstPercent,   // ✅ Fetched first from primary table, then secondary
-                    sgstPercent,   // ✅ Fetched first from primary table, then secondary
-                    igstPercent,   // ✅ Fetched first from primary table, then secondary
-                    cgstFetch,
-                    sgstFetch,
-                    igstFetch,
-                    amount
-                };
-
-                        structuredTable.Rows.Add(mappedRow);
-                        serialNumber++;
-                    }
-
-                    structuredTables.Add(structuredTable);
-                    break;
-                }
-            }
-
-            return structuredTables;
-        }
-
-
-        public static List<TableModel> StructureExtractedTables(AnalyzeResult result)
-        {
-            var structuredTables = new List<TableModel>();
 
             // Check if 'Items' field exists and is a list
             if (result.Documents.FirstOrDefault()?.Fields.TryGetValue("Items", out var itemsField) == true &&
@@ -242,11 +255,11 @@ namespace PdfImageProcessor.Services
                     var fields = item.Value.AsDictionary();
 
                     string description = fields.TryGetValue("Description", out var desc) ? desc?.Content?.Trim() ?? "" : "";
-                    string hsnCode = fields.TryGetValue("ProductCode", out var productCode) ? productCode?.Content?.Trim() ?? "" : "";
-                    string quantity = fields.TryGetValue("Quantity", out var qty) ? qty?.Content?.Trim() ?? "" : "";
-                    string unitPrice = fields.TryGetValue("UnitPrice", out var price) ? price?.Content?.Trim() ?? "" : "";
-                    string amount = fields.TryGetValue("Amount", out var amt) ? amt?.Content?.Trim() ?? "" : "";
-                    string taxValue = fields.TryGetValue("Tax", out var tax) ? tax?.Content?.Trim() ?? "" : "";
+                    string hsnCode = fields.TryGetValue("Product Code", out var productCode) ? productCode?.Content?.Trim() ?? "" : "";
+                    string quant = fields.TryGetValue("Quantity", out var qty) ? qty?.Content?.Trim() ?? "" : "";
+                    string unitPrice = fields.TryGetValue("Unit Price", out var price) ? price?.Content?.Trim() ?? "" : "";
+                    string amnt = fields.TryGetValue("Total Amount", out var amt) ? amt?.Content?.Trim() ?? "" : "";
+                    string taxValue = fields.TryGetValue("Amount", out var tax) ? tax?.Content?.Trim() ?? "" : "";
                     string sgstPercent = fields.TryGetValue("SGST%", out var sgstPer) ? sgstPer?.Content?.Trim() ?? "" : "";
                     string cgstPercent = fields.TryGetValue("CGST%", out var cgstPer) ? cgstPer?.Content?.Trim() ?? "" : "";
                     string igstPercent = fields.TryGetValue("IGST%", out var igstPer) ? igstPer?.Content?.Trim() ?? "" : "";
@@ -255,27 +268,46 @@ namespace PdfImageProcessor.Services
                     string igstValue = fields.TryGetValue("IGST", out var igstVal) ? igstVal?.Content?.Trim() ?? "" : "";
 
                     var row = new List<string>
-            {
-                serialNumber.ToString(),
-                description,
-                hsnCode,
-                quantity,
-                unitPrice,
-                taxValue,
-                sgstPercent,
-                cgstPercent,
-                igstPercent,
-                sgstValue,
-                cgstValue,
-                igstValue,
-                amount
-            };
+                    {
+                        serialNumber.ToString(),
+                        description,
+                        hsnCode,
+                        quant,
+                        unitPrice,
+                        taxValue,
+                        sgstPercent,
+                        cgstPercent,
+                        igstPercent,
+                        sgstValue,
+                        cgstValue,
+                        igstValue,
+                        amnt
+                    };
 
                     table.Rows.Add(row);
                     serialNumber++;
+                    var quantity = CleanNumericValue(quant);
+                    //var amount = CleanNumericValue(amnt);
+                    var sgstamt = CleanNumericValue(sgstValue);
+                    var cgstamt = CleanNumericValue(cgstValue);
+                    var igstamt = CleanNumericValue(igstValue);
+                    //totalAmount += Convert.ToDecimal(amount);
+                    try
+                    {
+                        cgst += Convert.ToDecimal(cgstamt);
+                        sgst += Convert.ToDecimal(sgstamt);
+                        igst += Convert.ToDecimal(igstamt);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
 
-                    Console.WriteLine($"✔ Row {serialNumber - 1}: {description}, Qty: {quantity}, Rate: {unitPrice}, Amount: {amount}");
+                   
+
+                   
                 }
+                
 
                 structuredTables.Add(table);
             }
@@ -407,8 +439,11 @@ namespace PdfImageProcessor.Services
 
 
 
-        private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData,decimal totalAmount, decimal totalRate,decimal totalQuantity, decimal cgst, decimal sgst, decimal igst)
+        private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData,decimal totalAmount=0, decimal totalRate=0,decimal totalQuantity=0, decimal cgst = 0, decimal sgst = 0, decimal igst = 0)
         {
+            extractedData.Sgst.Add(sgst.ToString());
+            extractedData.Cgst.Add(cgst.ToString());
+            extractedData.Igst.Add(igst.ToString());
             foreach (var field in result.Documents[0].Fields)
             {
                 var key = field.Key?.Trim().ToLower() ?? "";
@@ -421,31 +456,32 @@ namespace PdfImageProcessor.Services
                     if (key=="acknowledgementnumber") extractedData.AcknowledgeNumber.Add(value);
                     if (key== "acknowledgementdate") extractedData.AcknowledgeDate.Add(value);
                     if(key== "billingaddressrecipient")extractedData.Buyer.Add(value);
-                    if(key == "billingaddress") extractedData.BuyerAddressLine1.Add(value);
-                    if(key=="") 
-                    if (key=="customertaxid")extractedData.BuyerGstin.Add(value.Trim());  
+                    if (extractedData.Buyer.Count == 0) { if (key == "customername") extractedData.Buyer.Add(value); }
+                    if (key == "billingaddress") extractedData.BuyerAddressLine1.Add(value);                    
+                    if (key=="customertaxid")extractedData.BuyerGstin.Add(value.Trim());
+                    if (extractedData.BuyerGstin.Count == 0) { if (key == "vendortaxid") extractedData.BuyerGstin.Add(value); }
                     if (key== "invoiceid") extractedData.InvoiceNumber.Add(value);
                     if (key== "invoicedate") extractedData.InvoiceDate.Add(value);
                     if (key == "shippingaddressrecipient") extractedData.ShipTo.Add(value);
                     if(key == "shippingaddressrecipient") extractedData.ShipToAddressLine1.Add(value);
-                    if (key.Contains("note")) extractedData.DeleiveryNote.Add(value);
-                    if (key.Contains("payment") && key.Contains("term")) extractedData.TermsOfPayment.Add(value);
+                    if (key=="deliverynote") extractedData.DeleiveryNote.Add(value);
+                    if (key=="paymentterm") extractedData.TermsOfPayment.Add(value);
                     if ((key.Contains("despatch") || key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
                     if (key== "transportmode") extractedData.DespatchThrough.Add(value);
                     if (key == "vehiclenumber" ) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
-                    if (key.Contains("state") || key.Contains("slate name") ||key.Contains("place")) extractedData.BuyerState.Add(value);
+                    if (key=="buyerstate") extractedData.BuyerState.Add(value);
                     if (key=="billtocontactperson")  extractedData.BuyerContactPerson.Add(value);
                     if (key== "shiptocontactperson") extractedData.ShipToContactPerson.Add(value);
-                    if (key == "cgst") extractedData.Cgst.Add(value);
-                    if (key == "sgst") extractedData.Sgst.Add(value);
-                    if (key == "igst") extractedData.Igst.Add(value);
+                    if (key == "cgstamount") extractedData.Cgst.Add(value);
+                    if (key == "sgstamount") extractedData.Sgst.Add(value);
+                    if (key == "igstamount") extractedData.Igst.Add(value);
                     if (key == "invoicetotal") extractedData.TotalAmount.Add(value);
                     if (key == "ewaybillnumber") extractedData.EWayBill.Add(value);
                     if (key== "ifsccode") extractedData.IfscCode.Add(value);
                     if (key=="bankname") extractedData.BankName.Add(value);
                     if (key == "accountnumber") extractedData.AcctNo.Add(value);
-                    
+
                 }
             }
             //After scanning through all key value pairs gain scan through for capturing special cases
@@ -601,11 +637,11 @@ namespace PdfImageProcessor.Services
             {
                 extractedData.Quantity.Add("NA");
             }
-            extractedData.Rate = extractedData.Rate.Distinct().ToList();
-            if (extractedData.Rate.Count == 0)
-            {
-                extractedData.Rate.Add("NA");
-            }
+            //extractedData.Rate = extractedData.Rate.Distinct().ToList();
+            //if (extractedData.Rate.Count == 0)
+            //{
+            //    extractedData.Rate.Add("NA");
+            //}
             extractedData.Sgst = extractedData.Sgst.Distinct().ToList();
             if (extractedData.Sgst.Count == 0)
             {
@@ -621,11 +657,11 @@ namespace PdfImageProcessor.Services
             {
                 extractedData.Igst.Add("NA");
             }
-            extractedData.TotalAmount = extractedData.TotalAmount.Distinct().ToList();
-            if (extractedData.TotalAmount.Count == 0)
-            {
-                extractedData.TotalAmount.Add("NA");
-            }
+            //extractedData.TotalAmount = extractedData.TotalAmount.Distinct().ToList();
+            //if (extractedData.TotalAmount.Count == 0)
+            //{
+            //    extractedData.TotalAmount.Add("NA");
+            //}
             //extractedData.AmountChargable = extractedData.AmountChargable.Distinct().ToList();
 
             //extractedData.Declaration = extractedData.Declaration.Distinct().ToList();
