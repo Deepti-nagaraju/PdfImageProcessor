@@ -241,7 +241,7 @@ namespace PdfImageProcessor.Services
                     Headers = new List<string>
             {
                 "Sl No", "Description", "HSN Code", "Quantity", "Rate Per Quantity",
-                "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST", "Amount"
+                "Taxable Value", "SGST%", "CGST%", "IGST%", "SGST", "CGST", "IGST","Insurance", "Amount"
             },
                     Rows = new List<List<string>>()
                 };
@@ -266,6 +266,7 @@ namespace PdfImageProcessor.Services
                     string sgstValue = fields.TryGetValue("SGST", out var sgstVal) ? sgstVal?.Content?.Trim() ?? "" : "";
                     string cgstValue = fields.TryGetValue("CGST", out var cgstVal) ? cgstVal?.Content?.Trim() ?? "" : "";
                     string igstValue = fields.TryGetValue("IGST", out var igstVal) ? igstVal?.Content?.Trim() ?? "" : "";
+                    string insuranceValue = fields.TryGetValue("Insurance", out var insuranceVal) ? insuranceVal?.Content?.Trim() ?? "" : "";
 
                     var row = new List<string>
                     {
@@ -281,13 +282,14 @@ namespace PdfImageProcessor.Services
                         sgstValue,
                         cgstValue,
                         igstValue,
+                        insuranceValue,
                         amnt
                     };
 
                     table.Rows.Add(row);
                     serialNumber++;
                     var quantity = CleanNumericValue(quant);
-                    //var amount = CleanNumericValue(amnt);
+                    var amount = CleanNumericValue(amnt);
                     var sgstamt = CleanNumericValue(sgstValue);
                     var cgstamt = CleanNumericValue(cgstValue);
                     var igstamt = CleanNumericValue(igstValue);
@@ -298,6 +300,7 @@ namespace PdfImageProcessor.Services
                         cgst += Convert.ToDecimal(cgstamt);
                         sgst += Convert.ToDecimal(sgstamt);
                         igst += Convert.ToDecimal(igstamt);
+                        totalAmount += Convert.ToDecimal(amount);
                     }
                     catch
                     {
@@ -459,7 +462,8 @@ namespace PdfImageProcessor.Services
                     if (key== "acknowledgementdate") extractedData.AcknowledgeDate.Add(value);
                     if (key== "billingaddressrecipient")extractedData.Buyer.Add(value);
                     if (extractedData.Buyer.Count == 0) { if (key == "customername") extractedData.Buyer.Add(value); }
-                    if (key == "billingaddress") extractedData.BuyerAddressLine1.Add(value);                    
+                    if (key == "billingaddress") extractedData.BuyerAddressLine1.Add(value);
+                    if (extractedData.BuyerAddressLine1.Count == 0) { if (key == "customeraddress") extractedData.BuyerAddressLine1.Add(value); }
                     if (key=="customertaxid")extractedData.BuyerGstin.Add(value.Trim());
                     if (extractedData.BuyerGstin.Count == 0) { if (key == "vendortaxid") extractedData.BuyerGstin.Add(value); }
                     if (key== "invoiceid") extractedData.InvoiceNumber.Add(value);
@@ -470,6 +474,7 @@ namespace PdfImageProcessor.Services
                     if (key=="paymentterm") extractedData.TermsOfPayment.Add(value);
                     if ((key.Contains("despatch") || key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
                     if (key== "dispatchmode") extractedData.DespatchThrough.Add(value);
+                    if(extractedData.DespatchThrough.Count == 0) { if (key == "despatchthrough") extractedData.DespatchThrough.Add(value); }
                     if (key == "vehiclenumber" ) extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination")|| key.Contains("final destination")) extractedData.Destination.Add(value);
                     if (key=="buyerstate") extractedData.BuyerState.Add(value);
@@ -534,7 +539,10 @@ namespace PdfImageProcessor.Services
             {
                 extractedData.Buyer = companyNames;
             }
-
+            if (extractedData.TotalAmount.Count == 0)
+            {
+                extractedData.TotalAmount.Add(totalAmount.ToString());
+            }
             // Ensure unique values for each field
             extractedData.Irn = extractedData.Irn.Distinct().ToList();
             if(extractedData.Irn.Count ==0)
