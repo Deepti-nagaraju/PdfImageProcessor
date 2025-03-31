@@ -294,6 +294,7 @@ namespace PdfImageProcessor.Services
                     //totalAmount += Convert.ToDecimal(amount);
                     try
                     {
+                        totalQuantity += Convert.ToDecimal(quantity);
                         cgst += Convert.ToDecimal(cgstamt);
                         sgst += Convert.ToDecimal(sgstamt);
                         igst += Convert.ToDecimal(igstamt);
@@ -444,6 +445,7 @@ namespace PdfImageProcessor.Services
             extractedData.Sgst.Add(sgst.ToString());
             extractedData.Cgst.Add(cgst.ToString());
             extractedData.Igst.Add(igst.ToString());
+            extractedData.Quantity.Add(totalQuantity.ToString());
             foreach (var field in result.Documents[0].Fields)
             {
                 var key = field.Key?.Trim().ToLower() ?? "";
