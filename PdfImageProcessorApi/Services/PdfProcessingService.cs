@@ -20,7 +20,7 @@ namespace PdfImageProcessor.Services
     {
         private const string Endpoint = "https://deepti.cognitiveservices.azure.com/";
         private const string ApiKey = "3lUsGeSbyFujvN5DM45mYggERcTBcob26fhxqwSSXixhWi1PMwkhJQQJ99BBACGhslBXJ3w3AAALACOGVVET";
-        private static readonly string modelId = "Prebuilt_Invoice_3";
+        private static readonly string modelId = "Prebuilt_Invoice_4";
 
         private readonly DocumentAnalysisClient _client;
 
@@ -463,16 +463,18 @@ namespace PdfImageProcessor.Services
                     if (key == "invoiceid") extractedData.InvoiceNumber.Add(value);
                     if (key == "invoicedate") extractedData.InvoiceDate.Add(value);
                     if (key == "shippingaddressrecipient") extractedData.ShipTo.Add(value);
-                    if (key == "shippingaddressrecipient") extractedData.ShipToAddressLine1.Add(value);
+                    if (key == "shippingaddress") extractedData.ShipToAddressLine1.Add(value);
                     if (key == "deliverynote") extractedData.DeleiveryNote.Add(value);
                     if (key == "paymentterm") extractedData.TermsOfPayment.Add(value);
                     if ((key.Contains("despatch") || key.Contains("dispatch")) && ((key.Contains("number") || key.Contains("no")))) extractedData.DespatchDocNo.Add(value);
-                    if (key == "transportmode") extractedData.DespatchThrough.Add(value);
+                    if (key == "dispatchmode") extractedData.DespatchThrough.Add(value);
                     if (key == "vehiclenumber") extractedData.VehicleNo.Add(value);
                     if (key.Contains("destination") || key.Contains("final destination")) extractedData.Destination.Add(value);
                     if (key == "buyerstate") extractedData.BuyerState.Add(value);
                     if (key == "billtocontactperson") extractedData.BuyerContactPerson.Add(value);
+                    if (key == "buyercontactnumber") extractedData.BuyerContactNumber.Add(value);
                     if (key == "shiptocontactperson") extractedData.ShipToContactPerson.Add(value);
+                    if (key == "shippeingcontactnumber") extractedData.ShipToContactNumber.Add(value);
                     if (key == "cgstamount") extractedData.Cgst.Add(value);
                     if (key == "sgstamount") extractedData.Sgst.Add(value);
                     if (key == "igstamount") extractedData.Igst.Add(value);
@@ -481,6 +483,7 @@ namespace PdfImageProcessor.Services
                     if (key == "ifsccode") extractedData.IfscCode.Add(value);
                     if (key == "bankname") extractedData.BankName.Add(value);
                     if (key == "accountnumber") extractedData.AcctNo.Add(value);
+                    if (key == "buyerpin") extractedData.BuyerPinCode.Add(value);
 
                 }
             }
