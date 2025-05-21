@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
+using PdfImageProcessorApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PdfImageProcessor.Controllers
 {
@@ -17,10 +19,12 @@ namespace PdfImageProcessor.Controllers
     public class PdfController : ControllerBase
     {
         private readonly PdfProcessingService _pdfProcessingService;
+        private readonly InvoiceDbContext _context;
 
-        public PdfController(PdfProcessingService pdfProcessingService)
+        public PdfController(PdfProcessingService pdfProcessingService, InvoiceDbContext context)
         {
             _pdfProcessingService = pdfProcessingService;
+            _context = context;
         }
 
         /// <summary>
@@ -33,7 +37,21 @@ namespace PdfImageProcessor.Controllers
             {
                 return BadRequest(new { success = false, message = "Please upload at least one valid PDF file." });
             }
-
+            foreach (var file in files)
+            {
+                var filestore = new Filestore
+                {
+                    OrgId = 1, // Set this based on your logic
+                    FinancialYear = DateTime.Now.Year.ToString(),
+                    InvoiceFor = "Invoice", // Populate from processing if available
+                    SourceFileName = file.FileName,
+                    Status = "Uploaded",
+                    CreatedBy = "system", // Or actual user
+                    CreationDate = DateTime.UtcNow,
+                };
+                _context.Filestore.Add(filestore);
+            }
+            await _context.SaveChangesAsync();
             var extractedDataList = await _pdfProcessingService.ProcessPdfAsync(files);
 
             if (extractedDataList?.Count > 0)

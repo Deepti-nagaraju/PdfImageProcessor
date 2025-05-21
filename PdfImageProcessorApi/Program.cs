@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using PdfImageProcessor.Services;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 End of JWT token authentication
 **/
 
+builder.Services.AddDbContext<InvoiceDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 
