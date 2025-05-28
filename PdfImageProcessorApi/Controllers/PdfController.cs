@@ -144,5 +144,31 @@ namespace PdfImageProcessor.Controllers
             byte[] fileBytes = package.GetAsByteArray();
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ExtractedData.xlsx");
         }
+
+        [HttpGet("get-processed-data")]
+        public async Task<IActionResult> GetInvoiceDataByFileNameAsync()
+        {
+            // Step 1: Materialize metadata + filestore only
+            var baseRecords = await (
+                from meta in _context.FileMetadata
+                join file in _context.Filestore on meta.FileName equals file.SourceFileName
+                select new { meta, file }
+            ).ToListAsync();
+
+            // Step 2: Populate InvoiceItems manually in-memory
+            var result = baseRecords.Select(record => new InvoiceDocumentDto
+            {
+                Metadata = record.meta,
+                Filestore = record.file,
+                InvoiceItems = _context.InvoiceItem
+                    .Where(i => i.SourceFileName == record.meta.FileName)
+                    .ToList()
+            }).ToList();
+
+            return Ok(result);
+
+        }
+
+
     }
 }

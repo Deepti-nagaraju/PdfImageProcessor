@@ -11,59 +11,59 @@ namespace PdfImageProcessorApi.Models
         [Key]
         public int Id { get; set; }
 
-        public int? FilestoreId { get; set; }
+        public string? FileName { get; set; }
 
         [MaxLength(100)]
-        public string InvoiceNumber { get; set; }
+        public string? InvoiceNumber { get; set; }
 
-        public DateTime? InvoiceDate { get; set; }
-
-        [MaxLength(100)]
-        public string IrnNumber { get; set; }
+        public string? InvoiceDate { get; set; }
 
         [MaxLength(100)]
-        public string AcknowledgeNumber { get; set; }
+        public string? IrnNumber { get; set; }
 
-        public DateTime? AcknowledgeDate { get; set; }
+        [MaxLength(100)]
+        public string? AcknowledgeNumber { get; set; }
+
+        public string? AcknowledgeDate { get; set; }
 
         [MaxLength(255)]
-        public string BuyerName { get; set; }
+        public string? BuyerName { get; set; }
 
         [MaxLength(2000)]
-        public string BuyerAddressLine1 { get; set; }
+        public string? BuyerAddressLine1 { get; set; }
 
         [MaxLength(100)]
-        public string BuyerState { get; set; }
+        public string? BuyerState { get; set; }
 
         [MaxLength(100)]
-        public string BuyerPinCode { get; set; }
+        public string? BuyerPinCode { get; set; }
 
         [MaxLength(100)]
-        public string BuyerGstin { get; set; }
+        public string? BuyerGstin { get; set; }
 
         [MaxLength(100)]
-        public string BuyerEmail { get; set; }
+        public string? BuyerEmail { get; set; }
 
         [MaxLength(100)]
-        public string BuyerContactPerson { get; set; }
+        public string? BuyerContactPerson { get; set; }
 
         [MaxLength(100)]
-        public string BuyerContactNumber { get; set; }
+        public string? BuyerContactNumber { get; set; }
 
         [MaxLength(255)]
-        public string ShiptoName { get; set; }
+        public string? ShiptoName { get; set; }
 
         [MaxLength(2000)]
-        public string ShiptoAddressLine1 { get; set; }
+        public string? ShiptoAddressLine1 { get; set; }
 
         [MaxLength(100)]
-        public string ShiptoEmail { get; set; }
+        public string? ShiptoEmail { get; set; }
 
         [MaxLength(100)]
-        public string ShiptoContactPerson { get; set; }
+        public string? ShiptoContactPerson { get; set; }
 
         [MaxLength(100)]
-        public string ShiptoContactNumber { get; set; }
+        public string? ShiptoContactNumber { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Cgst { get; set; }
@@ -83,45 +83,45 @@ namespace PdfImageProcessorApi.Models
         public decimal? TotalInvoiceAmount { get; set; }
 
         [MaxLength(100)]
-        public string EwayBill { get; set; }
+        public string? EwayBill { get; set; }
 
         [MaxLength(255)]
-        public string DeliveryNote { get; set; }
+        public string? DeliveryNote { get; set; }
 
         [MaxLength(100)]
-        public string TermsOfPayment { get; set; }
+        public string? TermsOfPayment { get; set; }
 
         [MaxLength(100)]
-        public string DespatchDocNo { get; set; }
+        public string? DespatchDocNo { get; set; }
 
         [MaxLength(100)]
-        public string DespatchThrough { get; set; }
+        public string? DespatchThrough { get; set; }
 
         [MaxLength(100)]
-        public string Destination { get; set; }
+        public string? Destination { get; set; }
 
         [MaxLength(100)]
-        public string VehicleNo { get; set; }
+        public string? VehicleNo { get; set; }
 
         [MaxLength(255)]
-        public string DescriptionOfGoods { get; set; }
+        public string? DescriptionOfGoods { get; set; }
 
         [MaxLength(100)]
-        public string HsnNo { get; set; }
+        public string? HsnNo { get; set; }
 
-        public int? Quantity { get; set; }
+        public string? Quantity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Rate { get; set; }
 
         [MaxLength(100)]
-        public string BankName { get; set; }
+        public string? BankName { get; set; }
 
         [MaxLength(20)]
-        public string IfscCode { get; set; }
+        public string? IfscCode { get; set; }
 
         [MaxLength(50)]
-        public string AccountNo { get; set; }
+        public string? AccountNo { get; set; }
     }
 }
 

@@ -12,4 +12,5 @@ public class InvoiceDbContext : DbContext
     public DbSet<Filestore> Filestore { get; set; }
     public DbSet<FileMetadata> FileMetadata { get; set; }
     public DbSet<FilestoreAction> FilestoreAction { get; set; }
+    public DbSet<InvoiceItem> InvoiceItem { get; set; }
 }

@@ -13,6 +13,9 @@ using static PdfImageProcessor.Controllers.PdfController;
 using System.Reflection.PortableExecutable;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using PdfImageProcessorApi.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace PdfImageProcessor.Services
 {
@@ -23,10 +26,12 @@ namespace PdfImageProcessor.Services
         private static readonly string modelId = "Prebuilt_Invoice_4";
 
         private readonly DocumentAnalysisClient _client;
+        private readonly InvoiceDbContext _context;
 
-        public PdfProcessingService()
+        public PdfProcessingService(InvoiceDbContext context)
         {
             _client = new DocumentAnalysisClient(new Uri(Endpoint), new AzureKeyCredential(ApiKey));
+            _context = context;
         }
 
         public async Task<List<MainTableModel>> ProcessPdfAsync(IFormFileCollection files)
@@ -52,7 +57,7 @@ namespace PdfImageProcessor.Services
                 //}
                 //ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
                 ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
-
+                SaveData(extractedData);
                 extractedDataList.Add(extractedData);
             }
 
@@ -367,7 +372,8 @@ namespace PdfImageProcessor.Services
         {
             if (string.IsNullOrWhiteSpace(input))
                 return "0"; // Default value if input is empty
-
+            input = input.Replace("Rs.", "", StringComparison.OrdinalIgnoreCase).Replace("Rs .", "", StringComparison.OrdinalIgnoreCase)
+               .Replace("₹", "");
             return Regex.Replace(input, @"[^\d.]", ""); // Remove all non-numeric characters except the decimal point
         }
 
@@ -438,11 +444,6 @@ namespace PdfImageProcessor.Services
         }
 
 
-
-
-
-
-
         private void ExtractKeyValuePairs(AnalyzeResult result, MainTableModel extractedData, decimal totalAmount = 0, decimal totalRate = 0, decimal totalQuantity = 0, decimal cgst = 0, decimal sgst = 0, decimal igst = 0)
         {
             extractedData.Sgst.Add(sgst.ToString());
@@ -482,10 +483,10 @@ namespace PdfImageProcessor.Services
                     if (key == "buyercontactnumber") extractedData.BuyerContactNumber.Add(value);
                     if (key == "shiptocontactperson") extractedData.ShipToContactPerson.Add(value);
                     if (key == "shippeingcontactnumber") extractedData.ShipToContactNumber.Add(value);
-                    if (key == "cgstamount") extractedData.Cgst.Add(value);
-                    if (key == "sgstamount") extractedData.Sgst.Add(value);
-                    if (key == "igstamount") extractedData.Igst.Add(value);
-                    if (key == "invoicetotal") extractedData.TotalAmount.Add(value);
+                    if (key == "cgstamount") extractedData.Cgst.Add(CleanNumericValue(value));
+                    if (key == "sgstamount") extractedData.Sgst.Add(CleanNumericValue(value));
+                    if (key == "igstamount") extractedData.Igst.Add(CleanNumericValue(value));
+                    if (key == "invoicetotal") extractedData.TotalAmount.Add(CleanNumericValue(value));
                     if (key == "ewaybillnumber") extractedData.EWayBill.Add(value);
                     if (key == "ifsccode") extractedData.IfscCode.Add(value);
                     if (key == "bankname") extractedData.BankName.Add(value);
@@ -735,5 +736,78 @@ namespace PdfImageProcessor.Services
                 extractedData.HsnNo.Add("Refer table");
             }
         }
+
+        private async void SaveData(MainTableModel data)
+        {
+            var fileData = new FileMetadata
+            {
+                FileName = data.FileName,
+                InvoiceNumber = data.InvoiceNumber.FirstOrDefault(),
+                InvoiceDate = data.InvoiceDate.FirstOrDefault(),
+	            IrnNumber = data.Irn.FirstOrDefault(),
+	            AcknowledgeNumber =data.AcknowledgeNumber.FirstOrDefault() ,
+	            AcknowledgeDate = data.AcknowledgeDate.FirstOrDefault() ,
+	            BuyerName = data.Buyer.FirstOrDefault(),
+	            BuyerAddressLine1 =data.BuyerAddressLine1.FirstOrDefault(),
+	            BuyerState = data.BuyerState.FirstOrDefault(),
+	            BuyerPinCode = data.BuyerPinCode.FirstOrDefault() ,
+	            BuyerGstin = data.BuyerGstin.FirstOrDefault(),
+	            BuyerEmail =  data.BuyerEmail.FirstOrDefault() ,
+	            BuyerContactPerson = data.BuyerContactNumber.FirstOrDefault(),
+	            BuyerContactNumber =data.BuyerContactNumber.FirstOrDefault(),
+	            ShiptoName = data.ShipTo.FirstOrDefault(),
+	            ShiptoAddressLine1 =  data.ShipToAddressLine1.FirstOrDefault() ,
+	            ShiptoEmail = data.ShipToEmail.FirstOrDefault(),
+	            ShiptoContactPerson= data.ShipToContactPerson.FirstOrDefault() ,
+	            ShiptoContactNumber = data.ShipToContactNumber.FirstOrDefault(),
+	            Cgst = Convert.ToDecimal(data.Cgst.FirstOrDefault()),
+	            Sgst = Convert.ToDecimal(data.Sgst.FirstOrDefault()),
+	            Igst = Convert.ToDecimal(data.Igst.FirstOrDefault()),
+	            TotalInvoiceAmount= Convert.ToDecimal(data.TotalAmount.FirstOrDefault()) ,
+	            EwayBill = data.EWayBill.FirstOrDefault() ,
+	            DeliveryNote =data.DeleiveryNote.FirstOrDefault(),
+	            TermsOfPayment =data.DeleiveryNote.FirstOrDefault(),
+	            DespatchDocNo =data.DespatchDocNo.FirstOrDefault(),
+	            DespatchThrough =data.DespatchThrough.FirstOrDefault(),
+	            Destination = data.Destination.FirstOrDefault(),
+	            VehicleNo =data.VehicleNo.FirstOrDefault(),
+	            DescriptionOfGoods =data.DescriptionOfGoods.FirstOrDefault(),
+	            HsnNo =data.HsnNo.FirstOrDefault(),
+	            Quantity =data.Quantity.FirstOrDefault(),
+	            Rate = Convert.ToDecimal(data.Rate.FirstOrDefault()),
+	            BankName= data.BankName.FirstOrDefault(),
+	            IfscCode= data.IfscCode.FirstOrDefault(),
+	            AccountNo= data.AcctNo.FirstOrDefault(),
+            };
+            _context.FileMetadata.Add(fileData);
+            foreach (var table in data.ExtractedTables)
+            {
+                foreach (var row in table.Rows)
+                {
+                    var itemData = new InvoiceItem
+                    {
+                        SourceFileName = data.FileName,
+                        Description = row[1],
+                        HSNCode = row[2],
+                        Quantity = row[3],
+                        UnitPrice = row[4],
+                        TaxAmt = row[5],
+                        SgstPercent = row[6],
+                        CgstPercent = row[7],
+                        IgstPercent = row[8],
+                        SgstAmt = row[9],
+                        CgstAmt = row[10],
+                        IgstAmt = row[11],
+                        InsuranceAmt = row[12],
+                        Amount = row[13]
+                    };
+                    _context.InvoiceItem.Add(itemData);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+        }
     }
+
+    
 }
