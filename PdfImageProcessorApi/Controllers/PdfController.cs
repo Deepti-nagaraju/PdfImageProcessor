@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
 using PdfImageProcessorApi.Models;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PdfImageProcessor.Controllers
 {
@@ -37,8 +38,16 @@ namespace PdfImageProcessor.Controllers
             {
                 return BadRequest(new { success = false, message = "Please upload at least one valid PDF file." });
             }
+            var filesToProcess = new List<IFormFile>();
             foreach (var file in files)
             {
+                var fileExist = await _context.Filestore
+                .FirstOrDefaultAsync(f => f.SourceFileName == file.FileName);
+                if (fileExist != null)
+                {
+                    // Optionally log or notify that the file is already processed
+                    continue; // skip this file
+                }
                 var filestore = new Filestore
                 {
                     OrgId = 1, // Set this based on your logic
@@ -50,9 +59,10 @@ namespace PdfImageProcessor.Controllers
                     CreationDate = DateTime.UtcNow,
                 };
                 _context.Filestore.Add(filestore);
+                filesToProcess.Add(file);
             }
             await _context.SaveChangesAsync();
-            var extractedDataList = await _pdfProcessingService.ProcessPdfAsync(files);
+            var extractedDataList = await _pdfProcessingService.ProcessPdfAsync(filesToProcess);
 
             if (extractedDataList?.Count > 0)
             {

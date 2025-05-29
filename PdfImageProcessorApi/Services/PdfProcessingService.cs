@@ -16,6 +16,7 @@ using System.Reflection.Metadata;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using PdfImageProcessorApi.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace PdfImageProcessor.Services
 {
@@ -34,7 +35,7 @@ namespace PdfImageProcessor.Services
             _context = context;
         }
 
-        public async Task<List<MainTableModel>> ProcessPdfAsync(IFormFileCollection files)
+        public async Task<List<MainTableModel>> ProcessPdfAsync(IEnumerable<IFormFile> files)
         {
             var extractedDataList = new List<MainTableModel>();
 
@@ -803,6 +804,15 @@ namespace PdfImageProcessor.Services
                     };
                     _context.InvoiceItem.Add(itemData);
                 }
+            }
+            var filestore = await _context.Filestore
+            .FirstOrDefaultAsync(f => f.SourceFileName == data.FileName);
+
+            if (filestore != null)
+            {
+                filestore.Status = "Processed";
+                filestore.LastUpdatedBy = "system";
+                filestore.LastUpdatedDate = DateTime.UtcNow;
             }
             await _context.SaveChangesAsync();
 
