@@ -58,7 +58,7 @@ namespace PdfImageProcessor.Services
                 //}
                 //ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
                 ExtractKeyValuePairs(result, extractedData, totalAmount, totalRate, totalQuantity, cgst, sgst, igst);
-                SaveData(extractedData);
+                await SaveData(extractedData);
                 extractedDataList.Add(extractedData);
             }
 
@@ -738,7 +738,7 @@ namespace PdfImageProcessor.Services
             }
         }
 
-        private async void SaveData(MainTableModel data)
+        private async Task SaveData(MainTableModel data)
         {
             var fileData = new FileMetadata
             {
