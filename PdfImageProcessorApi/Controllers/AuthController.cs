@@ -28,28 +28,23 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
         [HttpPost("RegisterUser")]
         public IActionResult RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
+            /**
+             * Validate if Email is proper email or not. It should contain @ and .
+             * if not, return BadRequest("Provide a valid Email!");
+             */
+
             if (registerUserDto.Password != registerUserDto.PasswordConfirm)
             {
                 return BadRequest("Passwords do not match!");
             }
-            string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
-            Directory.CreateDirectory(dataDirectory);
-            string usersFilePath = Path.Combine(dataDirectory, "Users.txt");
-            //string usersFilePath = "Users.txt";
-            if (!System.IO.File.Exists(usersFilePath))
-            {
-                System.IO.File.WriteAllText(usersFilePath, "");
-            }
 
-            string usersJson = System.IO.File.ReadAllText(usersFilePath);
             bool userFound = false;
-
-            if (!string.IsNullOrEmpty(usersJson))
-            {
-                usersJson = "[" + usersJson + "]";
-                var users = JsonConvert.DeserializeObject<List<User>>(usersJson) ?? new List<User>();
-                userFound = users.Any(u => u.UserName == registerUserDto.UserName);
-            }
+            /**
+             * Check if user already exist or not
+             * SELECT Email FROM Auth WHERE Email = '" + registerUserDto.Email + "'";
+             * 
+             * if found then, userFound = true;
+             */
 
             if (userFound)
             {
@@ -64,27 +59,18 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
 
             byte[] passwordHash = _authHelper.GetPasswordHash(registerUserDto.Password, passwordSalt);
 
-            User newUser = new()
-            {
-                UserName = registerUserDto.UserName,
-                PasswordHash = Convert.ToBase64String(passwordHash),
-                PasswordSalt = Convert.ToBase64String(passwordSalt),
-                FirstName = registerUserDto.FirstName,
-                LastName = registerUserDto.LastName,
-                Gender = registerUserDto.Gender,
-                Active = true
-            };
 
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
-            string userString = JsonConvert.SerializeObject(newUser, settings);
-
-            using StreamWriter openFile = new(usersFilePath, append: true);
-            openFile.WriteLine(",\n" + userString);
-            openFile.Close();
+            /**
+             *  bool authInsertSuccess = Insert into Auth (Email,PasswordHash,PasswordSalt);
+             *  if(authInsertSuccess){
+             *      bool userInsertSuccess = Insert into User (FirstName,LastName,Email,Gender,Active=1);
+             *      if(!userInsertSuccess){
+             *          delete from Auth where Email = Email;
+             *          return Problem("Failed to register user");
+             *      }
+             *  }
+             * 
+             */
 
             return Ok("User created successfully!");
         }
@@ -93,44 +79,34 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
         [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
-            string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
-            Directory.CreateDirectory(dataDirectory);
-            string usersFilePath = Path.Combine(dataDirectory, "Users.txt");
-            //string usersFilePath = "Users.txt";
-            if (!System.IO.File.Exists(usersFilePath))
+            Auth authDetails = null;
+            /**
+             * Query Auth table by Email.. 
+             * authDetails = select * from Auth where Email = loginDto.Email
+             * if(authDetails == null){
+             *      return NotFound("User not found!");
+             * }
+             * 
+             */
+
+            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, authDetails.PasswordSalt);
+
+            for (int index = 0; index < passwordHash.Length; index++)
             {
-                return NotFound("No users found!");
+                if (passwordHash[index] != authDetails.PasswordHash[index])
+                {
+                    return StatusCode(401, "Incorrect password!");
+                }
             }
 
-            string usersJson = System.IO.File.ReadAllText(usersFilePath);
-            if (string.IsNullOrEmpty(usersJson))
-            {
-                return NotFound("No users found!");
-            }
+            int userId = 0;
+            /**
+             * Get userId from User table
+             * userId = select * from User where Email = loginDto.Email;
+             * 
+             */
 
-            usersJson = "[" + usersJson + "]";
-            var users = JsonConvert.DeserializeObject<List<User>>(usersJson);
-            if (users == null || !users.Any())
-            {
-                return NotFound("No users found!");
-            }
-
-            var userDetails = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
-
-            if (userDetails == null)
-            {
-                return NotFound("Username not found!");
-            }
-
-            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
-            byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
-
-            if (!passwordHash.SequenceEqual(userPasswordHash))
-            {
-                return Unauthorized("Incorrect password!");
-            }
-
-            string token = _authHelper.CreateJwtToken(userDetails.UserName);
+            string token = _authHelper.CreateJwtToken(userId.ToString());
             return Ok(new { token });
         }
 
