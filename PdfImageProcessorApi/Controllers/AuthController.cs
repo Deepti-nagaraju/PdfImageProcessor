@@ -75,38 +75,85 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
             return Ok("User created successfully!");
         }
 
+        //[AllowAnonymous]
+        //[HttpPost("Login")]
+        //public IActionResult Login([FromBody] LoginDto loginDto)
+        //{
+        //    Auth authDetails = null;
+        //    /**
+        //     * Query Auth table by Email.. 
+        //     * authDetails = select * from Auth where Email = loginDto.Email
+        //     * if(authDetails == null){
+        //     *      return NotFound("User not found!");
+        //     * }
+        //     * 
+        //     */
+
+        //    byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, authDetails.PasswordSalt);
+
+        //    for (int index = 0; index < passwordHash.Length; index++)
+        //    {
+        //        if (passwordHash[index] != authDetails.PasswordHash[index])
+        //        {
+        //            return StatusCode(401, "Incorrect password!");
+        //        }
+        //    }
+
+        //    int userId = 0;
+        //    /**
+        //     * Get userId from User table
+        //     * userId = select * from User where Email = loginDto.Email;
+        //     * 
+        //     */
+
+        //    string token = _authHelper.CreateJwtToken(userId.ToString());
+        //    return Ok(new { token });
+        //}
         [AllowAnonymous]
         [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
-            Auth authDetails = null;
-            /**
-             * Query Auth table by Email.. 
-             * authDetails = select * from Auth where Email = loginDto.Email
-             * if(authDetails == null){
-             *      return NotFound("User not found!");
-             * }
-             * 
-             */
-
-            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, authDetails.PasswordSalt);
-
-            for (int index = 0; index < passwordHash.Length; index++)
+            string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
+            Directory.CreateDirectory(dataDirectory);
+            string usersFilePath = Path.Combine(dataDirectory, "Users.txt");
+            //string usersFilePath = "Users.txt";
+            if (!System.IO.File.Exists(usersFilePath))
             {
-                if (passwordHash[index] != authDetails.PasswordHash[index])
-                {
-                    return StatusCode(401, "Incorrect password!");
-                }
+                return NotFound("No users found!");
             }
 
-            int userId = 0;
-            /**
-             * Get userId from User table
-             * userId = select * from User where Email = loginDto.Email;
-             * 
-             */
+            string usersJson = System.IO.File.ReadAllText(usersFilePath);
+            if (string.IsNullOrEmpty(usersJson))
+            {
+                return NotFound("No users found!");
+            }
 
-            string token = _authHelper.CreateJwtToken(userId.ToString());
+            usersJson = "[" + usersJson + "]";
+            var users = JsonConvert.DeserializeObject<List<User>>(usersJson);
+            if (users == null || !users.Any())
+            {
+                return NotFound("No users found!");
+
+
+
+            }
+
+            var userDetails = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
+
+            if (userDetails == null)
+            {
+                return NotFound("Username not found!");
+            }
+
+            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
+            byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
+
+            if (!passwordHash.SequenceEqual(userPasswordHash))
+            {
+                return Unauthorized("Incorrect password!");
+            }
+
+            string token = _authHelper.CreateJwtToken(userDetails.UserName);
             return Ok(new { token });
         }
 
