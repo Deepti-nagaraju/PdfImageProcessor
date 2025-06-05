@@ -155,19 +155,25 @@ namespace PdfImageProcessor.Controllers
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ExtractedData.xlsx");
         }
 
+ 
         [HttpGet("get-processed-data")]
-        public async Task<IActionResult> GetInvoiceDataByFileNameAsync()
+        public async Task<IActionResult> GetInvoiceDataByFileNameAsync([FromQuery] string? fileName = null)
         {
-          
-            var baseRecords = await (
-                from file in _context.Filestore
-                join meta in _context.FileMetadata
-                    on file.SourceFileName equals meta.FileName into metaGroup
-                from meta in metaGroup.DefaultIfEmpty()
-                select new { file, meta }
-            ).ToListAsync();
+            var baseQuery = from file in _context.Filestore
+                            join meta in _context.FileMetadata
+                                on file.SourceFileName equals meta.FileName into metaGroup
+                            from meta in metaGroup.DefaultIfEmpty()
+                            select new { file, meta };
 
-            // Populate InvoiceItems manually in-memory
+            // Filter by fileName if provided
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                baseQuery = baseQuery.Where(r => r.file.SourceFileName == fileName);
+            }
+
+            var baseRecords = await baseQuery.ToListAsync();
+
+            // Populate InvoiceItems manually
             var result = baseRecords.Select(record => new InvoiceDocumentDto
             {
                 Filestore = record.file,
@@ -178,8 +184,8 @@ namespace PdfImageProcessor.Controllers
             }).ToList();
 
             return Ok(result);
-
         }
+
 
 
     }
