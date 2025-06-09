@@ -111,7 +111,7 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
         //}
         [AllowAnonymous]
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
             Directory.CreateDirectory(dataDirectory);
@@ -148,7 +148,7 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
             byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
             byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
 
-            if (!passwordHash.SequenceEqual(userPasswordHash))
+            if (!passwordHash.SequenceEqual(userPasswordHash)))
             {
                 return Unauthorized("Incorrect password!");
             }
