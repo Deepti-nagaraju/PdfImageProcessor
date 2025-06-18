@@ -3,11 +3,13 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PdfImageProcessor.Dtos;
 using PdfImageProcessor.Helpers;
 using PdfImageProcessor.Models;
+using PdfImageProcessorApi.Models;
 
 namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
 {
@@ -18,62 +20,105 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
     public class AuthController : ControllerBase // ✅ Changed to ControllerBase for API only
     {
         private readonly AuthHelper _authHelper;
+        private readonly InvoiceDbContext _context;
 
-        public AuthController(IConfiguration config)
+        public AuthController(IConfiguration config, InvoiceDbContext context)
         {
             _authHelper = new AuthHelper(config);
+            _context = context;
         }
 
         [AllowAnonymous]
         [HttpPost("RegisterUser")]
         public IActionResult RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
-            /**
-             * Validate if Email is proper email or not. It should contain @ and .
-             * if not, return BadRequest("Provide a valid Email!");
-             */
+            // Validate email
+            if (string.IsNullOrWhiteSpace(registerUserDto.UserName) ||
+                !registerUserDto.UserName.Contains("@") ||
+                !registerUserDto.UserName.Contains("."))
+            {
+                return BadRequest("Provide a valid Email!");
+            }
 
+            // Confirm password
             if (registerUserDto.Password != registerUserDto.PasswordConfirm)
             {
                 return BadRequest("Passwords do not match!");
             }
 
-            bool userFound = false;
-            /**
-             * Check if user already exist or not
-             * SELECT Email FROM Auth WHERE Email = '" + registerUserDto.Email + "'";
-             * 
-             * if found then, userFound = true;
-             */
-
-            if (userFound)
+            // Check if user already exists
+            bool exists = _context.Auth.Any(a => a.Email == registerUserDto.UserName);
+            if (exists)
             {
                 return Conflict("User already exists!");
             }
 
+            // Generate salt
             byte[] passwordSalt = new byte[128 / 8];
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
                 rng.GetNonZeroBytes(passwordSalt);
             }
 
+            // Generate hash
             byte[] passwordHash = _authHelper.GetPasswordHash(registerUserDto.Password, passwordSalt);
 
+            // Insert into Auth
+            var auth = new Auth
+            {
+                Email = registerUserDto.UserName,
+                PasswordSalt = Convert.ToBase64String(passwordSalt),
+                PasswordHash = Convert.ToBase64String(passwordHash)
+            };
 
-            /**
-             *  bool authInsertSuccess = Insert into Auth (Email,PasswordHash,PasswordSalt);
-             *  if(authInsertSuccess){
-             *      bool userInsertSuccess = Insert into User (FirstName,LastName,Email,Gender,Active=1);
-             *      if(!userInsertSuccess){
-             *          delete from Auth where Email = Email;
-             *          return Problem("Failed to register user");
-             *      }
-             *  }
-             * 
-             */
 
-            return Ok("User created successfully!");
+            try
+            {
+                _context.Auth.Add(auth);
+                int authInsertSuccess = _context.SaveChanges();
+
+                if (authInsertSuccess > 0)
+                {
+                    // Step 2: Insert into User
+                    var user = new User
+                    {
+                        FirstName = registerUserDto.FirstName,
+                        LastName = registerUserDto.LastName,
+                        UserName = registerUserDto.UserName,
+                        Gender = registerUserDto.Gender,
+                        PasswordSalt = Convert.ToBase64String(passwordSalt),
+                        PasswordHash = Convert.ToBase64String(passwordHash),
+
+                        Active = true
+                    };
+
+                    _context.Users.Add(user);
+                    int userInsertSuccess = _context.SaveChanges();
+
+                    if (userInsertSuccess == 0)
+                    {
+                        // Rollback Auth insert
+                        var toDelete = _context.Auth.FirstOrDefault(a => a.Email == registerUserDto.UserName);
+                        if (toDelete != null)
+                        {
+                            _context.Auth.Remove(toDelete);
+                            _context.SaveChanges();
+                        }
+
+                        return Problem("Failed to register user in User table.");
+                    }
+
+                    return Ok("User registered successfully!");
+                }
+
+                return Problem("Failed to register user in Auth table.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Database error: " + (ex.InnerException?.Message ?? ex.Message));
+            }
         }
+
 
         //[AllowAnonymous]
         //[HttpPost("Login")]
@@ -111,7 +156,7 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
         //}
         [AllowAnonymous]
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             string dataDirectory = Path.Combine(Environment.CurrentDirectory, "App_Data");
             Directory.CreateDirectory(dataDirectory);
@@ -137,26 +182,34 @@ namespace PdfImageProcessorApi.Controllers // ✅ Updated namespace
 
 
             }
-
-            var userDetails = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
-
-            if (userDetails == null)
+            var authDetails = _context.Auth.FirstOrDefault(a => a.Email == loginDto.UserName);
+            if (authDetails == null)
             {
-                return NotFound("Username not found!");
+                return NotFound("User not found!");
             }
 
-            byte[] passwordHash = _authHelper.GetPasswordHash(loginDto.Password, Convert.FromBase64String(userDetails.PasswordSalt));
-            byte[] userPasswordHash = Convert.FromBase64String(userDetails.PasswordHash);
+            // Step 2: Hash the input password with stored salt
+            byte[] passwordSalt = Convert.FromBase64String(authDetails.PasswordSalt);
+            byte[] inputPasswordHash = _authHelper.GetPasswordHash(loginDto.Password, passwordSalt);
+            byte[] storedPasswordHash = Convert.FromBase64String(authDetails.PasswordHash);
 
-            if (!passwordHash.SequenceEqual(userPasswordHash))
+            // Step 3: Compare hashes
+            if (!inputPasswordHash.SequenceEqual(storedPasswordHash))
             {
                 return Unauthorized("Incorrect password!");
             }
 
-            string token = _authHelper.CreateJwtToken(userDetails.UserName);
+            // Step 4: Lookup user (for userId or claims)
+            var user = _context.Users.FirstOrDefault(u => u.UserName == loginDto.UserName);
+            if (user == null)
+            {
+                return NotFound("User record not found in User table.");
+            }
+
+            // Step 5: Create JWT token
+            string token = _authHelper.CreateJwtToken(user.Id.ToString()); // Or user.UserName
             return Ok(new { token });
         }
-
         [HttpGet("Logout")]
         public IActionResult Logout()
         {
