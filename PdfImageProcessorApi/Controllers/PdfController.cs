@@ -69,7 +69,7 @@ namespace PdfImageProcessor.Controllers
                 return Ok(new { success = true, data = extractedDataList });
             }
 
-            return BadRequest(new { success = false, message = "No data extracted from the uploaded PDF(s)." });
+            return Ok(new { success = false, message = "This file is processed." });
         }
 
         /// <summary>
@@ -185,8 +185,109 @@ namespace PdfImageProcessor.Controllers
 
             return Ok(result);
         }
+        [HttpPut("EditInvoiceByFileName")]
+        public async Task<IActionResult> EditInvoiceByFileNameAsync([FromQuery] string fileName, [FromBody] InvoiceDocumentDto updatedDto)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return BadRequest("fileName is required.");
+
+            // Get filestore and metadata
+            var fileRecord = await _context.Filestore.FirstOrDefaultAsync(f => f.SourceFileName == fileName);
+            var metadataRecord = await _context.FileMetadata.FirstOrDefaultAsync(m => m.FileName == fileName);
+
+            if (fileRecord == null || metadataRecord == null)
+                return NotFound("Invoice not found.");
+
+            // Update Filestore (optional – if you allow editing it)
+            fileRecord.LastUpdatedBy = updatedDto.Filestore?.LastUpdatedBy;
+            fileRecord.LastUpdatedDate = updatedDto.Filestore?.LastUpdatedDate ?? fileRecord.LastUpdatedDate;
+            fileRecord.Status = "Verified";
+            // Add other fields as needed...
+
+            // Update Metadata
+            metadataRecord.InvoiceNumber = updatedDto.Metadata.InvoiceNumber;
+            metadataRecord.InvoiceDate = updatedDto.Metadata.InvoiceDate;
+            metadataRecord.IrnNumber = updatedDto.Metadata.IrnNumber;
+            metadataRecord.AcknowledgeNumber = updatedDto.Metadata.AcknowledgeNumber;
+            metadataRecord.AcknowledgeDate = updatedDto.Metadata.AcknowledgeDate;
+            metadataRecord.BuyerName = updatedDto.Metadata.BuyerName;
+            metadataRecord.BuyerAddressLine1 = updatedDto.Metadata.BuyerAddressLine1;
+            metadataRecord.BuyerState = updatedDto.Metadata.BuyerState;
+            metadataRecord.BuyerPinCode = updatedDto.Metadata.BuyerPinCode;
+            metadataRecord.BuyerGstin = updatedDto.Metadata.BuyerGstin;
+            metadataRecord.BuyerEmail = updatedDto.Metadata.BuyerEmail;
+            metadataRecord.BuyerContactPerson = updatedDto.Metadata.BuyerContactPerson;
+            metadataRecord.BuyerContactNumber = updatedDto.Metadata.BuyerContactNumber;
+            metadataRecord.ShiptoName = updatedDto.Metadata.ShiptoName;
+            metadataRecord.ShiptoAddressLine1 = updatedDto.Metadata.ShiptoAddressLine1;
+            metadataRecord.ShiptoEmail = updatedDto.Metadata.ShiptoEmail;
+            metadataRecord.ShiptoContactPerson = updatedDto.Metadata.ShiptoContactPerson;
+            metadataRecord.ShiptoContactNumber = updatedDto.Metadata.ShiptoContactNumber;
+            metadataRecord.Cgst = updatedDto.Metadata.Cgst;
+            metadataRecord.Sgst = updatedDto.Metadata.Sgst;
+            metadataRecord.Igst = updatedDto.Metadata.Igst;
+            metadataRecord.TotalTax = updatedDto.Metadata.TotalTax;
+            metadataRecord.TotalInvoiceAmount = updatedDto.Metadata.TotalInvoiceAmount;
+            metadataRecord.EwayBill = updatedDto.Metadata.EwayBill;
+            metadataRecord.DeliveryNote = updatedDto.Metadata.DeliveryNote;
+            metadataRecord.TermsOfPayment = updatedDto.Metadata.TermsOfPayment;
+            metadataRecord.DespatchDocNo = updatedDto.Metadata.DespatchDocNo;
+            metadataRecord.DespatchThrough = updatedDto.Metadata.DespatchThrough;
+            metadataRecord.Destination = updatedDto.Metadata.Destination;
+            metadataRecord.VehicleNo = updatedDto.Metadata.VehicleNo;
+            metadataRecord.DescriptionOfGoods = updatedDto.Metadata.DescriptionOfGoods;
+            metadataRecord.HsnNo = updatedDto.Metadata.HsnNo;
+            metadataRecord.Quantity = updatedDto.Metadata.Quantity;
+            metadataRecord.Rate = updatedDto.Metadata.Rate;
+            metadataRecord.BankName = updatedDto.Metadata.BankName;
+            metadataRecord.IfscCode = updatedDto.Metadata.IfscCode;
+            metadataRecord.AccountNo = updatedDto.Metadata.AccountNo;
+            // Add all other metadata fields you support...
+
+            // Update Invoice Items
+            var existingItems = _context.InvoiceItem.Where(i => i.SourceFileName == fileName);
+            _context.InvoiceItem.RemoveRange(existingItems); // Remove old items
+
+            if (updatedDto.InvoiceItems != null && updatedDto.InvoiceItems.Any())
+            {
+                foreach (var item in updatedDto.InvoiceItems)
+                {
+                    item.SourceFileName = fileName; // Ensure linkage
+                }
+
+                await _context.InvoiceItem.AddRangeAsync(updatedDto.InvoiceItems);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Invoice updated successfully.");
+        }
 
 
+        [HttpDelete("delete-processed-data")]
+        public async Task<IActionResult> DeleteInvoiceDataByFileNameAsync([FromQuery] string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return BadRequest("fileName is required.");
+
+            // Delete invoice items
+            var invoiceItems = _context.InvoiceItem.Where(i => i.SourceFileName == fileName);
+            _context.InvoiceItem.RemoveRange(invoiceItems);
+
+            // Delete metadata
+            var metadata = await _context.FileMetadata.FirstOrDefaultAsync(m => m.FileName == fileName);
+            if (metadata != null)
+                _context.FileMetadata.Remove(metadata);
+
+            // Delete filestore
+            var filestore = await _context.Filestore.FirstOrDefaultAsync(f => f.SourceFileName == fileName);
+            if (filestore != null)
+                _context.Filestore.Remove(filestore);
+
+            await _context.SaveChangesAsync();
+
+            return Ok($"Records related to '{fileName}' were successfully deleted.");
+        }
 
     }
 }

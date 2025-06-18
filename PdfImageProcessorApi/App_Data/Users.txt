@@ -3,3 +3,5 @@
 {"userName":"bhaskar","passwordHash":"eEy/dWsTxyL/DyMX1au+26KQk6hYs+Qj7kzm+K+d+cU=","passwordSalt":"cf9UowEC3FBBTE2i7WuLAQ==","firstName":"bhaskar","lastName":"podugu","gender":"Male","active":true}
 ,
 {"userName":"test","passwordHash":"8FppLybKv89EXf6poIaMTN8AAu9C6tnD123qlXNm7vo=","passwordSalt":"vaFI/b8R+QECMRFyQ5/jzA==","firstName":"test","lastName":"test","gender":"test","active":true}
+,
+{"userName":"admin","passwordHash":"XOgkwzJ9+n7TQPbSkzDhSfaCXyV2kFfhqaTNTdrD+5k=","passwordSalt":"mjZ62g6cCQdBzB1g5wrTtw==","firstName":"admin","lastName":"admin","gender":"female","active":true}
